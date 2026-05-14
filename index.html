@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO Monitoring Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+/* ─── Design tokens ──────────────────────────────────────── */
+:root {
+  --bg-p:    #ffffff;
+  --bg-s:    #f5f4f2;
+  --bg-t:    #edebe8;
+  --tx-p:    #111827;
+  --tx-s:    #6b7280;
+  --tx-t:    #9ca3af;
+  --bd-t:    rgba(0,0,0,0.08);
+  --bd-s:    rgba(0,0,0,0.15);
+  --tx-ok:   #16a34a; --bg-ok:   #f0fdf4; --bd-ok:   #86efac;
+  --tx-err:  #dc2626; --bg-err:  #fef2f2; --bd-err:  #fca5a5;
+  --tx-warn: #d97706; --bg-warn: #fffbeb; --bd-warn: #fde68a;
+  --tx-info: #2563eb; --bg-info: #eff6ff; --bd-info: #93c5fd;
+  --radius:  8px;  --radius-lg: 12px;
+  --font:    -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-p:    #1c1c1e; --bg-s: #2c2c2e; --bg-t: #3a3a3c;
+    --tx-p:    #f2f2f7; --tx-s: #9ca3af; --tx-t: #636366;
+    --bd-t:    rgba(255,255,255,0.08); --bd-s: rgba(255,255,255,0.15);
+    --tx-ok:   #4ade80; --bg-ok:   #052e16; --bd-ok:   #166534;
+    --tx-err:  #f87171; --bg-err:  #450a0a; --bd-err:  #991b1b;
+    --tx-warn: #fbbf24; --bg-warn: #451a03; --bd-warn: #92400e;
+    --tx-info: #60a5fa; --bg-info: #0c1445; --bd-info: #1d4ed8;
+  }
+}
+
+/* ─── Reset & base ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: var(--font);
+  background: var(--bg-s);
+  color: var(--tx-p);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+/* ─── Layout ─────────────────────────────────────────────── */
+.wrap { max-width: 860px; margin: 0 auto; }
+.hdr {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 12px;
+  flex-wrap: wrap; margin-bottom: 1.5rem;
+}
+.hdr h1 { font-size: 18px; font-weight: 500; color: var(--tx-p); }
+.hdr p  { font-size: 13px; color: var(--tx-s); margin-top: 3px; }
+.hdr-right { display: flex; gap: 8px; align-items: center; }
+
+/* ─── Summary cards ──────────────────────────────────────── */
+.sum-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px; margin-bottom: 1.5rem;
+}
+@media (max-width: 480px) { .sum-grid { grid-template-columns: repeat(2, 1fr); } }
+.sum-c { background: var(--bg-p); border: 0.5px solid var(--bd-t); border-radius: var(--radius); padding: 10px 14px; }
+.sum-n { font-size: 22px; font-weight: 500; color: var(--tx-p); }
+.sum-l { font-size: 11px; color: var(--tx-s); margin-top: 2px; }
+
+/* ─── Tabs ───────────────────────────────────────────────── */
+.tabs {
+  display: flex; gap: 5px;
+  background: var(--bg-p); border: 0.5px solid var(--bd-t);
+  padding: 3px; border-radius: var(--radius);
+  width: fit-content; margin-bottom: 1.25rem;
+}
+.tab {
+  padding: 6px 18px; border-radius: 6px; border: none;
+  background: transparent; cursor: pointer;
+  font-size: 13px; font-weight: 400; color: var(--tx-s);
+  font-family: var(--font); transition: all .15s;
+}
+.tab.active {
+  background: var(--bg-s); color: var(--tx-p);
+  font-weight: 500; border: 0.5px solid var(--bd-t);
+}
+
+/* ─── Progress ───────────────────────────────────────────── */
+.prog-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+.prog-bg  { flex: 1; height: 5px; background: var(--bg-t); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 99px; background: var(--tx-ok); transition: width .3s ease; }
+.prog-txt { font-size: 12px; color: var(--tx-s); min-width: 72px; text-align: right; }
+
+/* ─── Category block ─────────────────────────────────────── */
+.cat-block {
+  border: 0.5px solid var(--bd-t); border-radius: var(--radius-lg);
+  overflow: hidden; margin-bottom: .875rem;
+  background: var(--bg-p);
+}
+.cat-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--bg-s);
+  cursor: pointer; user-select: none;
+}
+.cat-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--tx-p); }
+.cat-title i { font-size: 16px; color: var(--tx-s); }
+.cat-right { display: flex; align-items: center; gap: 8px; }
+.cat-cnt   { font-size: 11px; color: var(--tx-s); }
+.chev { font-size: 13px; color: var(--tx-s); transition: transform .2s; display: inline-block; }
+.chev.open { transform: rotate(180deg); }
+
+/* ─── Item ───────────────────────────────────────────────── */
+.item-wrap { border-top: 0.5px solid var(--bd-t); }
+.item-row {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 9px 14px; cursor: pointer; transition: background .1s;
+}
+.item-row:hover { background: var(--bg-s); }
+.item-row.done { opacity: .55; }
+.item-row.done .item-txt { text-decoration: line-through; color: var(--tx-s); }
+.item-left { display: flex; align-items: flex-start; gap: 9px; flex: 1; min-width: 0; }
+
+/* Checkbox */
+.cb {
+  width: 16px; height: 16px; border: 1.5px solid var(--bd-s);
+  border-radius: 4px; flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s; cursor: pointer;
+}
+.cb.chkd { background: var(--bg-ok); border-color: var(--bd-ok); }
+.cb.chkd i { font-size: 11px; color: var(--tx-ok); }
+
+.item-main { flex: 1; min-width: 0; }
+.item-top  { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.item-txt  { font-size: 13px; color: var(--tx-p); line-height: 1.4; }
+.tool-line { font-size: 11px; color: var(--tx-t); margin-top: 2px; }
+
+/* Expand button */
+.expand-btn {
+  flex-shrink: 0; background: none; border: none;
+  cursor: pointer; padding: 2px 4px; color: var(--tx-s);
+  font-size: 14px; transition: transform .2s; margin-top: 1px;
+  font-family: var(--font);
+}
+.expand-btn.open { transform: rotate(180deg); }
+
+/* ─── Badges ─────────────────────────────────────────────── */
+.badge {
+  font-size: 10px; font-weight: 500; padding: 2px 7px;
+  border-radius: 99px; white-space: nowrap; flex-shrink: 0;
+}
+.bc   { background: var(--bg-err);  color: var(--tx-err);  }
+.bw   { background: var(--bg-warn); color: var(--tx-warn); }
+.bo   { background: var(--bg-ok);   color: var(--tx-ok);   }
+.ba   { background: var(--bg-info); color: var(--tx-info); }
+
+/* ─── Detail panel ───────────────────────────────────────── */
+.detail-panel {
+  display: none;
+  background: var(--bg-s);
+  border-top: 0.5px solid var(--bd-t);
+  padding: 12px 14px 14px 39px;
+}
+.detail-panel.open { display: block; }
+.d-section {
+  margin-bottom: 10px; padding-left: 10px;
+  border-left: 2px solid transparent; border-radius: 0;
+}
+.d-section:last-child { margin-bottom: 0; }
+.d-why { border-left-color: var(--bd-info); }
+.d-sig { border-left-color: var(--bd-warn); }
+.d-act { border-left-color: var(--bd-ok);   }
+.d-label {
+  font-size: 10px; font-weight: 500; color: var(--tx-s);
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px;
+}
+.d-why .d-label { color: var(--tx-info); }
+.d-sig .d-label { color: var(--tx-warn); }
+.d-act .d-label { color: var(--tx-ok);   }
+.d-body  { font-size: 12px; color: var(--tx-p); line-height: 1.6; }
+.d-list  { list-style: none; padding: 0; }
+.d-list li {
+  font-size: 12px; color: var(--tx-p); line-height: 1.55;
+  padding: 2px 0 2px 14px; position: relative;
+}
+.d-list li::before { content: "›"; position: absolute; left: 2px; color: var(--tx-t); }
+
+/* ─── Buttons ────────────────────────────────────────────── */
+.btn {
+  font-size: 12px; color: var(--tx-s); background: var(--bg-p);
+  border: 0.5px solid var(--bd-t); border-radius: var(--radius);
+  padding: 6px 13px; cursor: pointer; display: flex; align-items: center;
+  gap: 5px; font-family: var(--font); transition: background .1s;
+}
+.btn:hover { background: var(--bg-t); }
+
+/* ─── Legend ─────────────────────────────────────────────── */
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--tx-s); }
+
+/* ─── Panel tabs ─────────────────────────────────────────── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ─── Auto-reset notice ──────────────────────────────────── */
+.notice {
+  font-size: 11px; color: var(--tx-t); text-align: right;
+  margin-bottom: .75rem;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hdr">
+    <div>
+      <h1>SEO monitoring playbook</h1>
+      <p id="dt-display"></p>
+    </div>
+    <div class="hdr-right">
+      <button class="btn" onclick="resetTab()">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Reset tab
+      </button>
+    </div>
+  </div>
+
+  <div class="sum-grid">
+    <div class="sum-c"><div class="sum-n" id="s-tot">0</div><div class="sum-l">Total items</div></div>
+    <div class="sum-c"><div class="sum-n" id="s-dn">0</div><div class="sum-l">Checked off</div></div>
+    <div class="sum-c"><div class="sum-n" id="s-cr">0</div><div class="sum-l">Critical left</div></div>
+    <div class="sum-c"><div class="sum-n" id="s-pc">0%</div><div class="sum-l">Completion</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('d',this)">Daily</button>
+    <button class="tab" onclick="switchTab('w',this)">Weekly</button>
+    <button class="tab" onclick="switchTab('m',this)">Monthly</button>
+  </div>
+
+  <div class="legend">
+    <div class="leg-item"><span class="badge bc">Critical</span> Fix/check immediately</div>
+    <div class="leg-item"><span class="badge bw">Watch</span> Monitor closely</div>
+    <div class="leg-item"><span class="badge bo">Opportunity</span> Ranking gain available</div>
+    <div class="leg-item"><span class="badge ba">AI-specific</span> Priority for AI sites</div>
+  </div>
+
+  <div class="prog-row">
+    <div class="prog-bg"><div class="prog-fill" id="pbar" style="width:0%"></div></div>
+    <span class="prog-txt" id="ptxt">0 / 0 done</span>
+  </div>
+
+  <p class="notice">Progress auto-saves per day and resets each morning.</p>
+
+  <div id="d" class="panel active"></div>
+  <div id="w" class="panel"></div>
+  <div id="m" class="panel"></div>
+
+</div>
+
+<script>
+/* ================================================================
+   DATA — add / edit your checklist items here.
+   Each item requires:
+     t       : string  — short label shown in the list
+     b       : string  — badge type: "c" critical | "w" watch | "o" opportunity | "a" AI-specific
+     tool    : string  — the tool or report to open for this check
+     why     : string  — why this metric matters (shown in detail panel)
+     signals : array   — threshold statements (bullet list)
+     actions : array   — what to do when signals fire (bullet list)
+   ================================================================ */
+const DATA = {
+  /* ── DAILY ──────────────────────────────────────────────── */
+  d: [
+    {
+      icon: "ti-chart-bar", title: "Traffic & visibility",
+      items: [
+        {
+          t: "Organic sessions vs yesterday & 7-day avg",
+          b: "c", tool: "GA4 → Acquisition → Organic Search",
+          why: "Organic traffic is your real-time revenue proxy. A sudden drop almost always traces to a ranking loss, algorithm update, or technical failure — all fixable if caught within 24 hours. Every day you miss it, competitors fill your vacated ranking positions.",
+          signals: [
+            "Drop >15% day-over-day: investigate immediately — check GSC for errors first",
+            "Drop >30%: emergency response — verify site is accessible and robots.txt hasn't changed",
+            "Consistent 3-day downward trend: likely algorithmic, not a one-time glitch",
+            "Single-day spike then normal: tracking anomaly or social/viral burst, not SEO",
+            "Segment by device: mobile-only drop = CWV or mobile usability issue"
+          ],
+          actions: [
+            "15%+ drop: open GSC Coverage → look for new crawl errors introduced yesterday",
+            "Check Google algorithm update calendar (SERoundtable, SearchEngineLand) for same date",
+            "Run URL Inspection on your top 5 pages — confirm they're indexed and crawlable",
+            "30%+ drop: load your homepage and top pages manually — if slow/broken, that's your cause",
+            "If no errors found: compare keyword positions in GSC → look for a competitor surging past you"
+          ]
+        },
+        {
+          t: "Impressions & clicks in GSC (28-day rolling)",
+          b: "w", tool: "GSC → Performance → Search results",
+          why: "Impressions = how often you appear in SERPs even when nobody clicks. CTR (clicks ÷ impressions) reveals how compelling your listing is. Impressions rising but clicks flat means Google shows you but users prefer competitors — a title/meta problem, not a ranking problem.",
+          signals: [
+            "CTR below 2% for position 1–3: your title tag is losing to competitors' listings",
+            "Impressions flat but position improving: you're ranking for very low-volume queries",
+            "Impressions up >10% week-over-week: content expansion or freshness update is working",
+            "Impressions dropping with stable positions: the queries themselves are losing search volume",
+            "CTR suddenly drops with stable position: a featured snippet or AI Overview appeared above you"
+          ],
+          actions: [
+            "Low CTR (<2%) on positions 1–3: rewrite title — add numbers, year, brackets, or a clear value proposition",
+            "If Google rewrote your meta description: give Google better structured data to pull from",
+            "Check SERP manually for that keyword: if AIO or featured snippet appeared, target the rich result format",
+            "Impressions dropping: use GSC date comparison to find which queries lost impressions → check Google Trends for volume shift",
+            "Clicks and impressions both growing: double down — create more content in those topic clusters"
+          ]
+        },
+        {
+          t: "Average position for top 20 keywords",
+          b: "w", tool: "GSC → Performance → Queries (sort by position)",
+          why: "The CTR cliff is steep: position 1 gets ~28% of clicks, position 3 gets ~10%, position 10 gets ~2.5%. A 2-spot drop from #1 to #3 can cut your traffic on that keyword by 65%. Tracking this daily catches rank fluctuations before they become permanent losses.",
+          signals: [
+            "Drop of 3+ positions: investigate the specific page — check for unintended content changes",
+            "Drop from top 3 → positions 4–10: high urgency — this is the steepest CTR cliff",
+            "Drop from page 1 → page 2: near-critical — CTR collapses from ~5% to under 1%",
+            "Sudden +5 position gain: a competitor likely dropped — act fast to consolidate with stronger internal linking",
+            "Fluctuating daily within ±2 positions: normal ranking dance — don't over-optimize"
+          ],
+          actions: [
+            "3+ position drop: check if the page was recently edited → compare your page vs current #1 (word count, freshness, schema)",
+            "New competitor appeared above you: analyze their content structure and match or exceed its depth",
+            "Keyword dropped from page 1 to page 2: add internal links from your most authoritative pages using the target keyword as anchor",
+            "Keyword gained: lock it in by expanding content depth and adding FAQ schema → improve internal linking to the page",
+            "Multiple keywords dropping simultaneously: likely algorithm update or site-wide technical issue — run a full crawl"
+          ]
+        },
+        {
+          t: "CTR for pages in positions 1–5",
+          b: "o", tool: "GSC → Performance → Pages (filter by position 1–5)",
+          why: "CTR is the conversion rate of your search listing. Google uses click signals as a quality indicator — sustained low CTR on a high-ranking page can eventually cause a demotion. A well-crafted title that improves CTR from 3% to 6% literally doubles your traffic without any ranking change.",
+          signals: [
+            "Position 1 benchmark: 25–35% CTR. Below 20%: title underperforming",
+            "Position 2 benchmark: 13–18%. Position 3: 9–12%",
+            "Sudden CTR drop with same position: check if Google launched a featured snippet or AIO for that query",
+            "CTR >50% above benchmark on any page: study that title — replicate the formula across similar pages",
+            "Branded queries with low CTR: sitelinks may not be showing, or a reputation issue"
+          ],
+          actions: [
+            "CTR below benchmark: rewrite title — add current year, specific numbers, or parenthetical value add like '(Complete Guide)'",
+            "Run GSC date comparison to find when CTR dropped → check if SERP changed on that date",
+            "If Google consistently rewrites your title in SERPs: align your H1 and structured data with the intended title",
+            "Test different meta descriptions — include a clear CTA and the keyword naturally in the first sentence",
+            "High impressions + low CTR is your highest-leverage SEO win: fixing it costs nothing and can yield 50–200% traffic lift"
+          ]
+        },
+        {
+          t: "AI Overview (SGE) presence for target queries",
+          b: "a", tool: "Manual SERP checks + GSC Search appearance filter",
+          why: "Google AI Overviews appear for roughly 15–20% of searches. For an AI site, these are your core traffic queries. An AIO appearing above your #1 ranking can reduce CTR by 50–70% even with no ranking change. Conversely, being cited inside an AIO is a massive authority signal.",
+          signals: [
+            "You rank #1 but traffic dropped: AIO likely appeared and is absorbing clicks — verify manually",
+            "Your content is cited inside an AIO: strong E-E-A-T signal — protect and strengthen that page",
+            "Competitors cited in AIO but not you: their content has structural or authority qualities yours lacks",
+            "AIO appearing for your target queries but cites no AI-niche sites: content authority gap",
+            "AIO content misrepresents your topic: Google is pulling from weaker sources — write the definitive answer"
+          ],
+          actions: [
+            "Not cited in AIO: rewrite key sections as direct, authoritative answers in the first paragraph → add FAQ schema → build E-E-A-T signals",
+            "AIO is absorbing your traffic: pivot toward transactional, tool-based, or long-tail conversational queries where AIO appears less",
+            "AIO cites you: keep this page updated and fresh → add more structured data to increase citation frequency",
+            "Monitor weekly which new queries gain AIO coverage → adjust content calendar to front-load AIO-resistant content types",
+            "Check competitor AIO citations — what content format is Google pulling from? Match and exceed that structure"
+          ]
+        }
+      ]
+    },
+    {
+      icon: "ti-activity", title: "Technical health",
+      items: [
+        {
+          t: "Site uptime & server response time",
+          b: "c", tool: "UptimeRobot / Better Uptime + GTmetrix",
+          why: "Google crawls your site continuously. Downtime or a slow TTFB during Googlebot visits creates crawl errors in GSC and reduces crawl frequency. Even 30 minutes of daily downtime compounds into reduced crawl budget over weeks, slowing content indexation and hurting freshness signals.",
+          signals: [
+            "Response time >2s: flag — user experience and crawl efficiency degrading",
+            "TTFB (Time to First Byte) >600ms: server-side bottleneck — caching or hosting issue",
+            "Any 5xx error: hard crawl failure — Googlebot cannot access your content",
+            "Downtime >10 min/day recurring: hosting infrastructure problem requiring immediate upgrade",
+            "Response time spike on specific pages only: likely an unoptimized database query or heavy script on those pages"
+          ],
+          actions: [
+            "TTFB >600ms: enable server-side caching (Cloudflare, WP Rocket) → check if your hosting tier is underpowered",
+            "Response time >2s: optimize images to WebP → defer non-critical JavaScript → enable a CDN",
+            "5xx errors detected: check hosting control panel for server logs → if recurring, review recent deployments",
+            "Downtime alert fires: verify via secondary tool → post status if >15 min → submit affected URLs for re-crawl in GSC after recovery",
+            "If AI tool pages are slow but homepage is fast: it's a compute/rendering problem specific to dynamic content — consider edge caching or SSR"
+          ]
+        },
+        {
+          t: "New crawl errors in GSC Coverage report",
+          b: "c", tool: "GSC → Indexing → Pages (filter by error type)",
+          why: "Every GSC crawl error is a page Google tried to visit and failed. On key ranking pages, this can trigger a ranking drop within days. For AI sites with dynamic content or frequent deployments, crawl errors often spike right after code releases.",
+          signals: [
+            "Server error (5xx): Google cannot access your content — urgent",
+            "'Blocked by robots.txt': check immediately if a key page was accidentally blocked",
+            "'Submitted URL not found (404)': you're sending Googlebot to dead pages",
+            "'Crawled – currently not indexed': Google visited but chose not to index — usually thin content",
+            "'Discovered – currently not indexed': Google knows the page exists but hasn't crawled it — internal linking problem"
+          ],
+          actions: [
+            "New 5xx errors: check server immediately → likely a post-deployment issue → resubmit after fix",
+            "Blocked by robots.txt: audit your robots.txt immediately — a single misconfigured rule can block your entire site",
+            "Submitted 404s: implement 301 redirects from old URLs to the most relevant live page → update sitemap",
+            "Crawled but not indexed: improve content quality (add depth, original data, expert voice) → add internal links from high-authority pages",
+            "Discovered not indexed: add internal links from already-indexed pages → manually submit via GSC URL Inspection"
+          ]
+        },
+        {
+          t: "Core Web Vitals status (LCP, INP, CLS)",
+          b: "c", tool: "GSC → Experience → Core Web Vitals",
+          why: "CWV is a confirmed Google ranking signal. For an AI site with chat interfaces and dynamic content, INP (interactivity) is your highest risk — JavaScript-heavy AI tools regularly fail this metric. Failing CWV on mobile disadvantages you in mobile SERPs, where most users now search.",
+          signals: [
+            "LCP: Good <2.5s | Needs improvement 2.5–4s | Poor >4s",
+            "INP: Good <200ms | Needs improvement 200–500ms | Poor >500ms (AI sites commonly fail this)",
+            "CLS: Good <0.1 | Needs improvement 0.1–0.25 | Poor >0.25",
+            "Watch 'Poor URLs' count in GSC — even 5–10 poor mobile URLs drags your site-wide score",
+            "Field data (real user data) in GSC matters more than lab data in PageSpeed Insights"
+          ],
+          actions: [
+            "LCP failing: preload your largest above-fold element → serve images in WebP with explicit dimensions → enable HTTP/2",
+            "INP failing: audit and defer non-critical third-party scripts → break up long JavaScript tasks (>50ms) → lazy-load AI tool widgets below the fold",
+            "CLS failing: add explicit width and height to all images → avoid injecting content above existing elements → use CSS transform instead of top/left for animations",
+            "After fixing, verify improvement in GSC field data (takes 28 days for the report to fully update)",
+            "Test on real Android devices — iOS Chrome uses WebKit and may differ from Google's CWV measurement"
+          ]
+        },
+        {
+          t: "New 404 errors & internal broken links",
+          b: "w", tool: "GSC → Indexing → Pages (Not found) + server logs",
+          why: "Internal broken links waste crawl budget — Googlebot follows them and hits dead ends. High-traffic pages that become 404s can lose their entire ranking history within weeks. External links pointing to your 404 pages are wasted PageRank.",
+          signals: [
+            "Any 404 on a previously-ranking page: emergency — set a redirect immediately",
+            "New 404s spiking after a deployment: likely a slug change or URL restructure that broke links",
+            "High-DA external links pointing to 404 pages: you're losing PageRank — check Ahrefs Best by Links → filter 404",
+            "More than 10 new 404s in one day: a recent site change broke URL structure",
+            "Redirect chains (A → B → C): crawl budget waste — consolidate to direct 301s"
+          ],
+          actions: [
+            "Newly discovered 404 on important page: implement 301 redirect to the most topically relevant live page immediately",
+            "Find all inbound external links to 404 pages in Ahrefs → implement redirects to reclaim that PageRank",
+            "Use Screaming Frog to find all internal links pointing to 404s → update them to correct URLs",
+            "After any CMS deployment: immediately crawl your site to catch slug changes → never change a URL without setting a 301",
+            "Redirect chains: update all A→B→C chains to A→C directly to eliminate crawl waste"
+          ]
+        },
+        {
+          t: "Sitemap accessibility & submission status",
+          b: "w", tool: "GSC → Sitemaps + browser check: /sitemap.xml",
+          why: "Your sitemap.xml is Google's navigation map to your content. For an AI site publishing frequently, a broken or outdated sitemap means new pages are discovered only through internal linking, slowing indexation by days or weeks.",
+          signals: [
+            "Sitemap returns anything other than HTTP 200: Googlebot cannot read it — fix immediately",
+            "'Sitemap could not be read' warning in GSC: XML syntax error or encoding issue",
+            "Last processed date in GSC >3 days old: Googlebot stopped reading your sitemap",
+            "Sitemap includes noindex URLs: contradictory signals confuse Googlebot",
+            "Sitemap has >50,000 URLs or >50MB: must be split into multiple sitemaps with an index file"
+          ],
+          actions: [
+            "Sitemap 404 or 500: check your CMS and deployment → regenerate and re-submit in GSC",
+            "XML syntax error: validate at xml-sitemaps.com → fix encoding to UTF-8 → no special characters in URLs",
+            "Noindex URLs in sitemap: remove them — a URL should be in sitemap OR have noindex, never both",
+            "Re-ping sitemap after every content publication batch: GSC → Sitemaps → re-submit",
+            "Automate sitemap pings via Yoast/Rank Math or a custom ping to GSC API after publishing"
+          ]
+        }
+      ]
+    },
+    {
+      icon: "ti-link", title: "Backlinks & authority",
+      items: [
+        {
+          t: "New backlink alerts — last 24 hours",
+          b: "o", tool: "Ahrefs / Semrush 'New backlinks' email alerts",
+          why: "For a new AI site, early link acquisition is the primary lever for domain authority growth. A single DA 70+ link can measurably shift your rankings within days. Knowing the moment you earn a link lets you immediately reinforce that page's internal linking.",
+          signals: [
+            "New link from DA/DR 50+: significant authority gain — act on it",
+            "5+ new links from the same domain at once: potential link scheme pattern — monitor",
+            "Links from .edu or .gov domains: highest-trust signals Google can receive",
+            "Anchor text exactly matching your target keyword multiple times: over-optimization risk — check your anchor text ratio",
+            "Link to a deep sub-page rather than homepage: actually better for topical authority — reinforce with internal links"
+          ],
+          actions: [
+            "New DA 50+ link acquired: immediately audit the receiving page → add internal links from this page to your 3–5 highest-priority ranking targets",
+            "Burst of links from same domain: check if it's a site-wide footer or widget — if so, ask for editorial placement instead",
+            "If link is from a major publication: amplify on social to drive traffic → engagement signals reinforce the authority gain",
+            "Track which content types are earning links naturally → double down on that format",
+            "After acquiring a strong link: submit the receiving page to GSC for re-crawl so Google processes the new authority faster"
+          ]
+        },
+        {
+          t: "Lost backlink alerts — last 24 hours",
+          b: "c", tool: "Ahrefs / Semrush 'Lost backlinks' filter (1 day)",
+          why: "Losing a high-DA backlink is a direct PageRank reduction. Rankings can drop within 1–4 weeks of a significant link loss. Sites redesign constantly, pages get deleted, and links disappear silently.",
+          signals: [
+            "Lost link from DA/DR 60+: investigate immediately — this is a meaningful authority loss",
+            "Lost link was sending measurable referral traffic: doubly urgent — both authority and direct visitors lost",
+            "Multiple links from same domain lost at once: that site redesigned or removed a page you were featured on",
+            "Link removed shortly after being gained: possible editorial review — check if your content quality was questioned",
+            "Lost link was an anchor-text-rich editorial mention: hardest type to replace"
+          ],
+          actions: [
+            "Find the URL of the page that used to link → check if it still exists: if redesigned, contact the editor to be re-included",
+            "If the linking page was deleted: check if the domain has another relevant page → pitch a fresh mention",
+            "If link was removed intentionally: check if your content was recently updated in a way that made the citation less relevant → fix and re-pitch",
+            "Track your top 20 backlinks individually — for each DA 70+ link, have a relationship with the editor so you can protect it",
+            "Monthly goal: replace every lost DA 50+ link with 2 new ones of similar or higher authority"
+          ]
+        },
+        {
+          t: "Brand mentions — linked & unlinked",
+          b: "o", tool: "Google Alerts + Brand24 / Mention.com",
+          why: "Unlinked brand mentions are free link-building opportunities. The site already trusts you enough to mention your brand — they just didn't link. Converting 10% of unlinked mentions to links is typically achievable and represents pure authority gain with no content creation required.",
+          signals: [
+            "Unlinked mention in DA 60+ publication: highest priority outreach target",
+            "Mention in a roundup or 'best of' post without a link: almost always convertible — easy ask",
+            "Negative review or critical mention: E-E-A-T risk — needs a response strategy",
+            "Competitor mentioned alongside you: understand how you're perceived relative to competitors",
+            "Spike in brand mentions: you may have been featured in something larger — investigate the source"
+          ],
+          actions: [
+            "Unlinked mention found: send a brief, friendly outreach email asking if they'd consider adding a link — typical conversion rate 15–30%",
+            "Negative mention: respond professionally in comments or contact the author → a resolved negative can become a positive testimonial",
+            "Track which publications mention you most often without linking — these are relationship-building targets",
+            "Monthly: compile all unlinked DA 40+ mentions → batch your outreach to save time",
+            "Set up Google Alerts for: your brand name, your main tool names, and key team members"
+          ]
+        }
+      ]
+    },
+    {
+      icon: "ti-pencil", title: "Content & indexing",
+      items: [
+        {
+          t: "New content from yesterday — confirm indexed",
+          b: "w", tool: "GSC URL Inspection + site:yourdomain.com '[title]'",
+          why: "Content that isn't indexed cannot rank. For an AI site publishing daily, a persistent indexing lag means your freshness signals deteriorate before Google even sees the content. Indexing latency on a new site can run 2–14 days.",
+          signals: [
+            "Not indexed within 3 days on an established site: internal linking or crawl budget issue",
+            "Not indexed within 7 days on a new site: content quality may not meet Google's threshold",
+            "'Discovered – currently not indexed': Google knows it exists but hasn't visited — internal linking problem",
+            "'Crawled – currently not indexed': Google visited but decided it's not worth indexing — quality issue",
+            "Erratic indexing (some pages instant, others weeks): crawl budget distribution is uneven"
+          ],
+          actions: [
+            "Content not indexed after 3 days: run GSC URL Inspection → 'Request indexing' for key pages (use sparingly)",
+            "Add internal links from 2–3 already-indexed, high-authority pages — fastest way to signal Googlebot that a new page matters",
+            "'Crawled but not indexed': review the page — is it thin? Does it add unique value? Revise and re-submit",
+            "On a new site: ensure every new page is linked from the homepage or a hub page, not buried 4+ clicks deep",
+            "Consistently slow indexing: increase publishing of interlinked content clusters — Google indexes sites faster when it sees topically coherent patterns"
+          ]
+        },
+        {
+          t: "Top 5 pages — ranking & traffic health check",
+          b: "c", tool: "GA4 + GSC (compare landing page data)",
+          why: "Your top 5 organic pages likely generate 60–80% of your total organic traffic. A single-page drop has outsized business impact. These pages are also your internal link hubs — if they rank lower, the authority they pass to other pages drops too, creating a cascading effect.",
+          signals: [
+            "Traffic drop >10% on a top page day-over-day: investigate cause before assuming algorithm",
+            "Position drop 3+ spots on a top page: check for content changes, new competitor, or technical issue",
+            "Impressions stable but traffic down on top page: featured snippet or AIO appeared and took clicks",
+            "Multiple top pages dropping simultaneously: site-wide technical issue or algorithm update",
+            "Top page gaining traffic: reinforce with internal links and fresh content to lock in the gain"
+          ],
+          actions: [
+            "Single page traffic drop: check if the page was recently edited → open GSC URL Inspection → compare vs current top 3 competitors",
+            "Position drop with no site changes: a stronger competitor published better content → do a content gap analysis → expand with more depth and updated data",
+            "Multiple pages dropping: check algorithm update calendar → run a full technical crawl → check for manual action in GSC",
+            "Top page unexpectedly improving: strengthen internal links to this page → expand content depth → add structured data to capture rich results",
+            "After any site-wide change (redesign, migration, CMS update): monitor top 5 pages hourly for 48 hours"
+          ]
+        },
+        {
+          t: "Crawl budget efficiency (AI site priority)",
+          b: "a", tool: "GSC → Settings → Crawl stats",
+          why: "AI sites often generate dynamic URLs, faceted navigation, and paginated content that bleeds crawl budget away from your money pages. If Googlebot spends its daily crawl quota on low-value generated URLs, your key ranking pages get crawled less frequently.",
+          signals: [
+            "'Response errors' count rising: Googlebot is wasting budget on broken pages",
+            "High 'Redirected' URLs crawled: unnecessary redirect chains consuming quota",
+            "'Not found' URLs crawled regularly: broken internal links sending Googlebot to dead ends",
+            "Crawl frequency per key page <1x per week: your top pages aren't getting enough crawl attention",
+            "Dynamic URLs being crawled (e.g., ?session=, ?filter=, ?ref=): parameter handling may not be configured"
+          ],
+          actions: [
+            "Block parameter URLs in robots.txt or via GSC URL Parameters: prevent session IDs, tracking params, and filter URLs from consuming crawl budget",
+            "Audit internal links — every link to a 404 or redirect wastes Googlebot's time on that visit",
+            "Consolidate thin content: 50 thin AI-generated pages hurt crawl budget more than 5 comprehensive ones",
+            "Use noindex on tag pages, author archives, and search result pages to concentrate budget on your content pages",
+            "Add priority values in sitemap.xml for your most important pages — signals relative importance to Googlebot"
+          ]
+        }
+      ]
+    }
+  ],
+
+  /* ── WEEKLY ─────────────────────────────────────────────── */
+  w: [
+    {
+      icon: "ti-trophy", title: "Rankings deep dive",
+      items: [
+        {
+          t: "Full keyword ranking report — week-over-week",
+          b: "c", tool: "Semrush Position Tracking / Ahrefs Rank Tracker",
+          why: "Weekly ranking data shows trends that daily data obscures with noise. A keyword that fluctuates ±2 positions daily might show a consistent -5 trend over 7 days — that's a real signal. Weekly analysis is also the right cadence to identify which content optimizations from last week are taking effect.",
+          signals: [
+            "Any keyword dropping more than 5 positions WoW: content or link profile weakened",
+            "Keywords moving off page 1: immediate priority — these were your revenue-generating positions",
+            "5+ keywords dropping simultaneously: likely algorithm update or site-wide issue",
+            "Any keyword jumping 10+ positions: investigate why — replicate that pattern on similar pages",
+            "Page 2 cluster (positions 11–20): your fastest traffic growth opportunities"
+          ],
+          actions: [
+            "Keywords dropped 5+ positions: compare your page vs new #1 ranking competitor → look for content freshness, depth gaps, or schema they have that you don't",
+            "Page 1 losses: add strong internal links from related content → improve on-page signals → consider acquiring a topically relevant backlink",
+            "Page 2 keywords (11–20): run GSC for each → find the specific page ranking → optimize title tag, add FAQ schema, improve internal links",
+            "Algorithm update confirmed: do not make panic changes → audit E-E-A-T signals first → if pattern is clear, adjust content strategy toward more authoritative, cited content",
+            "Keyword gaining suddenly: create supporting content around it to build topical authority cluster"
+          ]
+        },
+        {
+          t: "Competitor ranking movements for shared keywords",
+          b: "w", tool: "Semrush Competitive Positioning Map / Ahrefs",
+          why: "A competitor's ranking gain on your keyword is a zero-sum loss for you. Monitoring this weekly tells you who is actively improving content in your space and where you need to respond. For an AI site, new AI-focused competitors can emerge and rank quickly on informational queries.",
+          signals: [
+            "Competitor jumped from position 5 to position 1 on your target keyword: they published something significantly better",
+            "New domain appearing in your keyword space: a new competitor entering your niche",
+            "Established competitor's rankings dropping: potential opportunity to claim their positions",
+            "Competitor gaining rankings on topics you haven't covered yet: content gap you should fill",
+            "Multiple competitors all losing on same keyword: there may be a ranking vacuum — perfect time to publish"
+          ],
+          actions: [
+            "Competitor surged past you: analyze their page — what changed? Word count? New data? Better structure? Video? → match and exceed",
+            "New competitor appearing: do a full audit of their site → identify their link building strategy → create a content plan to compete on their top 10 keywords",
+            "Competitor dropping: check if they had technical issues or lost backlinks → your window to solidify positions",
+            "Content gap found: create a comprehensive page on that topic before they consolidate those positions",
+            "Competitor content is thin but outranking you: you can out-execute them — publish a deeper, more structured piece with schema"
+          ]
+        },
+        {
+          t: "Keywords on positions 11–20 — quick win targets",
+          b: "o", tool: "GSC → Performance → filter position 11–20",
+          why: "Position 11–20 keywords are the single highest-leverage SEO investment. You're already indexed and trusted for these queries. With targeted optimization, many can move to page 1 within 2–4 weeks — generating traffic that would otherwise require months of new content creation.",
+          signals: [
+            "Keyword in position 11–12: one strong optimization push can bring it to page 1",
+            "High volume keyword in 11–20: prioritize immediately — the traffic delta between page 2 and page 1 is 5–10x",
+            "Page ranking 11–20 has few internal links: your easiest fix — internal linking can move positions quickly",
+            "Page in 11–20 with no schema markup: adding FAQ or HowTo schema frequently pushes pages to page 1",
+            "Multiple keywords clustering around position 15: your content is relevant but not authoritative enough"
+          ],
+          actions: [
+            "Identify all keywords in positions 11–20 in GSC → sort by impressions (highest first = biggest opportunity)",
+            "For each top keyword: check which page is ranking → review title, H1, meta description → does it explicitly address the keyword's intent?",
+            "Add internal links from 2–3 related high-authority pages using the target keyword as anchor text",
+            "Add FAQ schema with questions matching PAA boxes for that query",
+            "Improve content depth: add original examples, statistics, or perspectives that page 1 results don't have → 300–500 word expansion is often enough"
+          ]
+        },
+        {
+          t: "People Also Ask & featured snippet opportunities",
+          b: "o", tool: "AlsoAsked.com + GSC + manual SERP check",
+          why: "Featured snippets and PAA boxes appear above position 1 — they're 'position 0' real estate. For an AI site covering technical topics, these are highly achievable because they reward direct, well-structured answers. Winning a featured snippet can lift your CTR from 5% to 15–25% overnight.",
+          signals: [
+            "You rank in positions 2–5 but there's a featured snippet above position 1: you're the prime candidate to take it",
+            "PAA questions appear for your target keyword that you don't currently answer: content gap opportunity",
+            "Featured snippet you hold is thin or incomplete: competitors may dislodge you — improve it",
+            "Your ranking page has the answer but it's buried in paragraph 3: restructuring can win the snippet",
+            "Multiple PAA boxes = high intent, conversational query — great targets for AI site content"
+          ],
+          actions: [
+            "Find pages ranking 2–5 for featured-snippet queries → look at the snippet type (paragraph, list, or table?) → match the exact format in your content",
+            "For paragraph snippets: write a 40–60 word direct answer immediately below the H2 heading that matches the query",
+            "For list snippets: use a numbered list with an H2 or H3 that starts with 'How to' or 'Steps to'",
+            "For PAA boxes: use AlsoAsked.com → add H3 subheadings for each question with concise 2–3 sentence answers → add FAQ schema",
+            "After optimization: re-check the SERP manually within 1–2 weeks — featured snippets update faster than regular rankings"
+          ]
+        },
+        {
+          t: "AI Overview citations — are you included?",
+          b: "a", tool: "Manual SERP checks + GSC Search appearance filter",
+          why: "Being cited in an AI Overview signals to Google that your content is authoritative enough to be the basis for AI-generated answers. For an AI site, your topical authority determines whether Google's own AI trusts your content. Ignored in AIOs = authority gap that compounds over time.",
+          signals: [
+            "You rank #1 but traffic dropped: AIO likely appeared and is absorbing clicks — verify manually",
+            "Your brand/site cited in an AIO: strong E-E-A-T signal — protect and strengthen that page",
+            "Competitors cited in AIO but not you: their content has structural or authority qualities yours lacks",
+            "AIO answer is factually wrong and cites a competitor: opportunity to write the definitive correct answer",
+            "AIO appears for your target queries but cites no AI-niche sites: Google may not yet trust AI-site content for these queries"
+          ],
+          actions: [
+            "If cited: add more structured data → keep it fresh and updated → build more backlinks (cited content tends to stay cited)",
+            "If not cited despite strong rankings: rewrite your introduction as a direct, authoritative answer → use precise factual language, not marketing language → add original data",
+            "If AIO absorbs significant traffic: pivot toward transactional or tool-based queries where AIO is less prevalent",
+            "Monitor weekly which new queries gain AIO treatment → adjust content calendar to front-load AIO-resistant content types",
+            "Track AIO citations vs competitor citations monthly — a growing gap signals you need to invest in E-E-A-T improvements"
+          ]
+        }
+      ]
+    },
+    {
+      icon: "ti-tool", title: "Technical audit",
+      items: [
+        {
+          t: "Weekly crawl of new & updated pages",
+          b: "w", tool: "Screaming Frog free (500 URLs) / Sitebulb",
+          why: "Every page you publish or update is a potential source of technical errors — duplicate meta descriptions, missing H1s, incorrect canonicals, or broken images. Catching these weekly prevents a compound problem where dozens of pages have uncorrected issues that collectively drag down your site quality score.",
+          signals: [
+            "Duplicate title tags: Google may consolidate your pages or choose the wrong one to rank",
+            "Missing or duplicate H1: weakens keyword relevancy signal for that page",
+            "Canonical pointing to wrong URL: you're telling Google to rank a different page than intended",
+            "Images >1MB: slowing page speed, likely hurting CWV scores",
+            "Pages with no internal links pointing to them: orphan pages Googlebot won't prioritize"
+          ],
+          actions: [
+            "Run Screaming Frog on newly published/updated URLs: export Response Codes, Page Titles, H1, Canonicals tabs → fix any errors before they age",
+            "Duplicate titles: each page must have a unique title — rewrite → check template-generated pages (category, tag, archive pages often auto-generate duplicates)",
+            "Orphan pages: add them to sitemap and create at least one internal link from a relevant existing page",
+            "Canonical errors: ensure every page correctly self-references OR points to the preferred version → never canonical to a noindex page",
+            "Set up Screaming Frog on a weekly schedule or use Ahrefs Site Audit on auto-crawl weekly setting"
+          ]
+        },
+        {
+          t: "Core Web Vitals field data — all pages",
+          b: "c", tool: "GSC → Experience → Core Web Vitals (field data)",
+          why: "Lab data (PageSpeed Insights) shows potential — field data shows reality. Google ranks you based on field data from real Chrome users visiting your pages. An AI site with heavy JavaScript can score well in labs but fail in the field due to real-world network and device variability.",
+          signals: [
+            "Poor URLs count increasing week-over-week: a new page or feature is degrading CWV",
+            "INP failures concentrated on specific pages: likely a heavy JavaScript feature on those pages",
+            "CLS failures after a layout change: new CSS or content injection is causing layout shifts",
+            "CWV 'Needs Improvement' cluster: these are the easiest gains — small optimizations push them to 'Good'",
+            "Mobile CWV failing, desktop passing: mobile-specific rendering issue or inadequate responsive image handling"
+          ],
+          actions: [
+            "Drill into Poor URLs: identify what's different about those pages (are they your AI tool pages? Heavy content?)",
+            "INP fix playbook: reduce JavaScript execution time → use requestIdleCallback for non-critical work → profile with Chrome DevTools Performance panel",
+            "CLS fix: use the Layout Instability panel in Chrome → find which elements shift → add explicit dimensions to images and dynamic elements",
+            "Mobile-only failures: test on a real low-end Android device, not just Chrome DevTools",
+            "Set up real-user monitoring with web-vitals.js to catch regressions within hours of a deployment"
+          ]
+        },
+        {
+          t: "Schema/structured data validation",
+          b: "a", tool: "Google Rich Results Test + GSC → Enhancements",
+          why: "Schema markup is the gateway to rich results — FAQ dropdowns, HowTo steps, article dates, sitelinks search boxes. For an AI site, Article, FAQ, and HowTo schema are your primary tools to occupy more SERP real estate. A broken schema is invisible to Google — you don't lose a ranking, you simply never gain the enhanced listing.",
+          signals: [
+            "GSC 'Enhancement errors' for Article, FAQ, or HowTo schema: Google is ignoring your structured data",
+            "Rich results appearing for competitors but not you on same query type: their schema is valid, yours has errors",
+            "'Missing recommended fields' warnings in GSC: schema is valid but incomplete — reduces eligibility for richer results",
+            "Schema on pages that Google hasn't indexed: zero value — fix indexation first",
+            "Structured data score improving in GSC: rich results are being surfaced — double down on this content type"
+          ],
+          actions: [
+            "Run every new page through Google Rich Results Test before publishing → validate Article, FAQ, or HowTo schema",
+            "Fix GSC Enhancement errors immediately: most common issues — datePublished/dateModified missing from Article schema, FAQ answers too short",
+            "For FAQ schema: add 4–6 questions per page minimum, each with a 40–100 word answer → questions must match actual PAA boxes for that query",
+            "Monitor which pages with schema are generating rich results in GSC → prioritize internal linking and content improvements on them",
+            "Schema that generates rich results but low CTR: the FAQ questions may not match user intent → update to more compelling questions"
+          ]
+        },
+        {
+          t: "Internal linking audit for new content",
+          b: "o", tool: "Screaming Frog → 'Inlinks' report",
+          why: "Internal links are how you distribute PageRank across your site. A new page with no internal links from existing high-authority pages must wait for Googlebot to discover it via sitemap alone — slow and inefficient. Strategically linking from strong pages to new content accelerates both indexing and ranking.",
+          signals: [
+            "New pages with <3 internal links pointing to them: underpowered — add more",
+            "High-authority pages (strong backlink profiles) with no outgoing links to related new content: untapped PageRank distribution",
+            "Deep pages (4+ clicks from homepage): likely getting minimal crawl attention",
+            "Topic clusters where hub page doesn't link to all cluster content: breaks your topical authority signal",
+            "Pages ranking well that don't link to related lower-ranking pages: missed opportunity to lift adjacent content"
+          ],
+          actions: [
+            "After publishing any new content: immediately add internal links from at least 3 existing pages on related topics — use descriptive, keyword-relevant anchor text",
+            "Review your top 10 pages by backlinks → are they linking to your strategically important newer content? If not, add links",
+            "Audit for orphan pages (Screaming Frog → 'Inlinks' → filter by inlinks = 0) → connect them to the content graph",
+            "Build topic clusters: one comprehensive 'hub' page links to multiple 'spoke' pages → spokes link back to hub → creates topical authority individual pages can't achieve alone",
+            "Avoid over-linking: 150+ internal links on a single page dilutes the PageRank value of each individual link"
+          ]
+        }
+      ]
+    },
+    {
+      icon: "ti-file-analytics", title: "Content performance",
+      items: [
+        {
+          t: "Pages with declining CTR — title/meta optimization",
+          b: "o", tool: "GSC → Performance → Pages → sort by CTR change",
+          why: "CTR decay happens gradually — a competitor writes a better title, Google tests a new SERP layout, or an AI Overview appears. Pages that once had 8% CTR slowly falling to 4% represent massive traffic losses that a title rewrite could reverse in days.",
+          signals: [
+            "CTR dropped >20% month-over-month for a page with stable position: title optimization urgently needed",
+            "Page getting >500 impressions/day with <2% CTR: your title is not compelling relative to competitors",
+            "'Power page' (top 5 by traffic) showing CTR decline: monitor weekly — even 1% CTR drop on a high-impression page means significant traffic loss",
+            "CTR drop coincides with SERP layout change: a new rich result type captured the clicks above you",
+            "All pages in the same topic cluster showing CTR decline: SERP format for that query type has changed"
+          ],
+          actions: [
+            "For each underperforming title: search the keyword yourself → read all page-1 titles → write a title that offers something different or better",
+            "Effective title formulas: [Number] + [Topic] + [Benefit] | [Year] + [Keyword] + 'Guide' | '[Question]' + direct answer preview",
+            "Test meta descriptions: include the primary keyword in the first sentence → add a clear benefit → end with a soft CTA",
+            "Change title → monitor for 2 weeks → compare CTR before and after → if improved, apply the same pattern to similar pages",
+            "Never change a title on a page that's performing well — only test titles on declining or underperforming pages"
+          ]
+        },
+        {
+          t: "AI-generated content engagement metrics",
+          b: "a", tool: "GA4 → Engagement → Landing pages",
+          why: "Google's Helpful Content system evaluates whether users are satisfied with your content. If they arrive from search, read briefly, and leave, Google interprets that as a quality failure. For an AI site, AI-generated content is under extra scrutiny. Low engagement can trigger E-E-A-T penalties over time.",
+          signals: [
+            "Average engagement time <30 seconds on long-form content: users found it unhelpful or irrelevant",
+            "Bounce rate >80% on informational pages: strong signal that content doesn't satisfy intent",
+            "Scroll depth <40% on average: users aren't reading — introduction is too generic or structure is poor",
+            "High exit rate on tool/feature pages: UX or comprehension issue",
+            "Users returning to same query type within 24 hours after visiting your page: Google counts this as a dissatisfaction signal"
+          ],
+          actions: [
+            "Low engagement on AI content: add a strong specific introduction that signals exactly what the user will learn → break up dense text with headers, examples, visuals",
+            "High bounce rate: check if the page truly answers what the title promises → if the title over-promises, rewrite it",
+            "For AI tool pages with low engagement: add a clear 'Getting started' section → add example outputs → reduce friction to first value moment",
+            "Scroll depth <40%: restructure the page to surface key value immediately in the first screen → use formatting to allow scanning",
+            "Track 'pogo-sticking' pattern: if users consistently return to Google quickly after visiting, your content has a fundamental quality or intent-matching problem"
+          ]
+        },
+        {
+          t: "Content freshness — flag pages needing update",
+          b: "w", tool: "GSC + CMS date filter + manual SERP check",
+          why: "Google's freshness algorithm rewards recently updated content for time-sensitive queries. An AI site writing about AI tools, models, or technology has an especially high freshness requirement — AI developments from 6 months ago are often outdated.",
+          signals: [
+            "Page published >6 months ago ranking for queries where SERP shows recent dates: freshness is now a factor",
+            "Ranking dropped 2–4 positions and content hasn't been updated in months: freshness decay",
+            "Competitor recently updated their article and jumped above you: confirms Google rewards freshness here",
+            "Statistics or data on the page are >12 months old: accuracy issue reducing E-E-A-T",
+            "Page about a specific AI model or tool that has had major updates you haven't reflected"
+          ],
+          actions: [
+            "Identify all pages ranking in top 10 not updated in 6+ months → check manually if SERP shows recent dates on competing content",
+            "Freshness update playbook: update schema dateModified, add a new section reflecting current developments, update all statistics, add a visible 'Last updated' date",
+            "For AI tool or model pages: treat them as living documents — update whenever a significant model update, new feature, or pricing change occurs",
+            "After updating: re-submit to GSC for re-crawling → ranking should begin recovering within 1–3 weeks if freshness was the main issue",
+            "Prioritize freshness updates on top-traffic pages: ROI of updating an existing high-traffic page is far higher than creating new content from scratch"
+          ]
+        }
+      ]
+    },
+    {
+      icon: "ti-arrows-exchange", title: "Backlink profile",
+      items: [
+        {
+          t: "Weekly link acquisition summary",
+          b: "w", tool: "Ahrefs / Semrush → Referring domains (weekly view)",
+          why: "Link velocity — how consistently you acquire new links — is a signal Google monitors for naturalness. Sudden spikes followed by silence look unnatural. Steady weekly growth is the ideal pattern. Setting a baseline weekly acquisition target compounds significantly over 12 months.",
+          signals: [
+            "0 new referring domains in a week: no link-building activity — evaluate whether you have linkable assets",
+            "5+ new referring domains from same TLD in one week: potential pattern flag — check for link scheme",
+            "New link from a publication you've never been mentioned by before: organic discovery — investigate how they found you",
+            "Referring domain count declining week-over-week: links are expiring faster than you're acquiring — red alert",
+            "High DR/DA link acquired unexpectedly: investigate — could be a mention in a major publication"
+          ],
+          actions: [
+            "Set a weekly link acquisition target (1–3 quality links/week for new sites) and track against it",
+            "Identify what triggered any unexpected links → double down on that content type",
+            "0 new links this week: review your linkable asset strategy → create tools, original research, or data studies → these generate links passively",
+            "Referring domains declining: audit your disavow file — are you disavowing legitimate links?",
+            "Link velocity spike from unknown domains: pause link-building temporarily to let the profile normalize"
+          ]
+        },
+        {
+          t: "Toxic/spammy backlinks — disavow management",
+          b: "c", tool: "GSC → Links export + Semrush Backlink Toxicity",
+          why: "While Google claims to ignore most spammy links, a concentrated pattern of manipulative links can trigger a manual penalty or algorithmic spam action. For a new site still building authority, toxic links have disproportionate impact because you have fewer quality links to dilute them.",
+          signals: [
+            "Semrush Toxicity Score >45%: investigate and consider disavowing",
+            "Links from sites with 0 traffic and 0 organic keywords: likely PBN or link farm",
+            "Anchor text spam: dozens of links using exact-match commercial keywords you didn't build — likely negative SEO attack",
+            "Links from foreign-language sites with no thematic connection to your niche: low-value at best, toxic at worst",
+            "GSC manual action received mentioning 'unnatural links': emergency — disavow and request reconsideration immediately"
+          ],
+          actions: [
+            "Do not over-disavow: disavowing legitimate links can hurt your rankings → only disavow links that are clearly manipulative",
+            "Disavow process: export full link list from GSC → cross-check with Semrush Toxicity filter → compile domain-level disavow for clusters → submit in GSC Disavow Tool",
+            "Negative SEO check: if you see a sudden spike of exact-match anchor spam, it may be a competitor's negative SEO attack → disavow the batch",
+            "Review disavow file quarterly — never delete a disavow without verifying the domain has legitimately cleaned up",
+            "New site tip: don't start disavowing until you have at least 50 legitimate referring domains — the ratio matters"
+          ]
+        }
+      ]
+    }
+  ],
+
+  /* ── MONTHLY ────────────────────────────────────────────── */
+  m: [
+    {
+      icon: "ti-clipboard-check", title: "Full technical SEO audit",
+      items: [
+        {
+          t: "Comprehensive site crawl — structure & health",
+          b: "c", tool: "Screaming Frog full crawl / Sitebulb",
+          why: "Monthly full crawls catch systemic issues that weekly partial crawls miss: emerging redirect chains, orphan page clusters, duplicate content from CMS templates, and growing thin-page problems. Technical debt compounds silently and often only becomes visible in rankings 2–3 months after it started.",
+          signals: [
+            "Orphan pages growing month-over-month: your content architecture is becoming disconnected",
+            "Redirect chains (3+ hops): PageRank and crawl budget waste accumulating",
+            "Duplicate H1/title tags on >5% of pages: template generating duplicate signals at scale",
+            "Non-HTTPS internal links: mixed content issues that can trigger security warnings",
+            "Response time >2s on >20% of pages: site-wide performance problem, not isolated issues"
+          ],
+          actions: [
+            "Run full crawl → export to spreadsheet → sort by issue severity (5xx → 4xx → redirect chains → duplicate tags → missing tags)",
+            "Orphan pages: build an internal linking map → connect all orphans to their most relevant hub page → add to sitemap",
+            "Redirect chains: update source links to point directly to final destinations → eliminate all 3+ hop chains",
+            "Duplicate title/H1 at scale: audit your CMS templates → the issue is usually auto-generated pages (categories, tags, authors, pagination)",
+            "Create a monthly 'technical debt score': count open issues each month → your goal is zero new critical issues and declining total issue count"
+          ]
+        },
+        {
+          t: "E-E-A-T signals comprehensive review",
+          b: "c", tool: "Manual audit + Google Search Quality Rater Guidelines",
+          why: "E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) is Google's overall quality assessment of your site. For an AI site, this is particularly scrutinized because AI-generated content without strong human expertise signals reads as low-quality. Sites with weak E-E-A-T consistently underperform algorithmic updates.",
+          signals: [
+            "Author bylines missing or leading to empty author pages: expertise signal absent",
+            "About page doesn't clearly establish who runs the site and their qualifications: trust deficit",
+            "No external references, citations, or links to authoritative sources: missing credibility signals",
+            "Content makes claims without supporting data or sources: E-E-A-T failure on YMYL topics",
+            "No evidence of real-world experience: review or how-to content with no personal experience signals"
+          ],
+          actions: [
+            "Audit every author page: add real credentials, publication history, LinkedIn profile, and a photo",
+            "Audit your About page: include founding story, team credentials, editorial standards, and contact information",
+            "Review your top 10 pages for citation quality: add references to studies, official documentation, or authoritative sources",
+            "For AI site content: where AI was used in drafting, have a human expert review and add original perspective → add transparent editorial process disclosure",
+            "Build brand presence: get featured in legitimate publications, contribute to industry discussions, build social proof"
+          ]
+        },
+        {
+          t: "Index coverage full report & ratio analysis",
+          b: "c", tool: "GSC → Indexing → Pages (full export)",
+          why: "The ratio of indexed to submitted URLs reveals the health of your content quality at scale. If you have 500 pages but only 200 are indexed, Google is telling you 300 pages don't meet its quality threshold. For an AI site, this is critical as AI-generated content can accumulate thin pages rapidly.",
+          signals: [
+            "Index ratio <70% of submitted pages: significant quality or crawlability issue",
+            "'Crawled – currently not indexed' growing month-over-month: content quality problem at scale",
+            "Large 'noindex' cluster on pages you want indexed: template accidentally adding noindex to key pages",
+            "'Blocked by robots.txt' count growing: new page types being accidentally blocked",
+            "Indexed URL count declining month-over-month: Google is de-indexing content — serious quality or spam signal"
+          ],
+          actions: [
+            "Export full GSC index report → calculate indexed/total ratio → benchmark it monthly → target >85%",
+            "For 'crawled but not indexed' cluster: review 10–20 of these pages → identify the pattern → common causes: thin content, near-duplicate pages, low unique value → fix root cause",
+            "If index count is declining: compare exports month-over-month → audit de-indexed pages for quality → add depth and unique value before re-submitting",
+            "High noindex count unexpectedly: audit CMS → check if a template, plugin, or deployment change accidentally added noindex",
+            "Content pruning strategy: if you have many thin pages that consistently fail to index, merge them or accept a deliberate noindex to concentrate crawl budget"
+          ]
+        },
+        {
+          t: "Log file analysis — Googlebot crawl behavior",
+          b: "a", tool: "Screaming Frog Log File Analyser / Splunk",
+          why: "Log files show exactly which pages Googlebot is crawling, how often, and in what order. This is ground-truth data that GSC only approximates. For an AI site with programmatic content, log files reveal crawl budget waste invisible in GSC — often the root cause of slow indexation.",
+          signals: [
+            "Key pages crawled <1x per week: Google isn't prioritizing your most important content",
+            "Low-value pages crawled frequently: crawl budget is being wasted on generated or thin pages",
+            "Crawl rate dropping month-over-month: Google is losing trust or interest in your site",
+            "Frequent 302 redirects in logs: temporary redirects used where permanent ones should be",
+            "Bot user agents other than Googlebot crawling frequently: could be scrapers impacting server performance"
+          ],
+          actions: [
+            "Monthly log analysis: export Googlebot visits → sort by crawl frequency → compare to your editorial priority",
+            "Pages Google ignores: add internal links from high-authority pages → improve content quality → submit for indexing",
+            "Pages Google over-crawls (thin/generated): add noindex or disallow in robots.txt → frees budget for important pages",
+            "Crawl rate declining: improve overall site quality (fresher content, better E-E-A-T, more backlinks) → Google crawls sites it trusts more frequently",
+            "Set up automated monthly log export and comparison — the trend over time is more valuable than any single month"
+          ]
+        }
+      ]
+    },
+    {
+      icon: "ti-bulb", title: "Strategy & content",
+      items: [
+        {
+          t: "Keyword research refresh & new opportunities",
+          b: "o", tool: "Semrush / Ahrefs Keyword Explorer + Google Trends",
+          why: "The AI industry moves at extreme speed. New tool names, new model releases, and new techniques appear weekly. A keyword universe from 3 months ago is meaningfully outdated for an AI site. Monthly research keeps your content pipeline pointed at actual search demand.",
+          signals: [
+            "New keyword clusters appearing around recent AI releases or updates: publish before competitors consolidate these positions",
+            "'Rising' topics in Google Trends related to your niche: early-mover content captures long-tail volume as it grows",
+            "Seasonal patterns in existing keyword volume: plan content refreshes to coincide with volume peaks",
+            "Competitor ranking for 50+ keywords you don't target at all: significant content gap",
+            "Your existing content is targeting keywords that have lost 50%+ search volume: reallocate those pages toward higher-demand angles"
+          ],
+          actions: [
+            "Monthly keyword discovery session: enter your top 5 competitor domains in Ahrefs/Semrush → filter by keywords they rank for that you don't → sort by volume → prioritize top 20",
+            "Google Trends: search your core topics with 'past 3 months' filter → note any breakout sub-topics → create content within 1–2 weeks while interest is rising",
+            "Content-to-keyword mapping: audit every existing page → what is its primary keyword? Is that keyword still high-value?",
+            "Build a 'keyword shelf': maintain a running spreadsheet of researched keywords → pull from this each week rather than researching from scratch monthly",
+            "AI site specific: track new model names (GPT-5, Claude 4, Gemini 2.x, etc.) → create comparison and review content the day after major AI releases — search volume for new model names spikes within 24–48 hours"
+          ]
+        },
+        {
+          t: "Content gap analysis vs top 3 competitors",
+          b: "o", tool: "Ahrefs Content Gap / Semrush Keyword Gap",
+          why: "Content gaps are the topics your competitors rank for that you don't cover at all. These represent the fastest path to new traffic because the demand is proven. Creating content for high-volume gaps that competitors dominate with weak content is your fastest ranking wins.",
+          signals: [
+            "Competitor ranks for 100+ keywords related to your niche that you don't: significant strategic gap",
+            "Competitor's content on a shared topic is thin but outranks you: you can out-execute them directly",
+            "Topic cluster where competitors have a hub page and multiple subtopic pages but you only have one page: structural disadvantage",
+            "Competitors ranking for your brand-adjacent keywords: they're capturing intent that should flow to you",
+            "Gap topics getting more search volume than your current target keywords: time to reprioritize"
+          ],
+          actions: [
+            "Run Ahrefs Content Gap: enter your domain + 3 competitor domains → set filter 'target ranks, but I don't' → export → sort by volume",
+            "Prioritize gaps where: volume >500/month AND competitor content is low-quality AND you have natural topical authority",
+            "Create a 90-day content calendar from top gaps: aim for 2–3 new gap-filling articles per week",
+            "For gaps where competitor has a weak, thin article: create a comprehensive piece → target featured snippets → build 2–3 backlinks → you can outrank them within 60–90 days",
+            "Track gap-filling content in a separate dashboard: monthly, measure how many gap articles have reached page 1 → this is your content ROI metric"
+          ]
+        },
+        {
+          t: "E-E-A-T enhancement — expert signals & citations",
+          b: "c", tool: "Manual audit + third-party coverage tracking",
+          why: "E-E-A-T improvements compound over time but take 3–6 months to show effect. Starting this monthly review early, rather than waiting for an algorithm hit, is the preventive strategy that separates AI sites that survive updates from those that get penalized by them.",
+          signals: [
+            "Organic traffic volatility correlating with Google quality updates: E-E-A-T is likely the issue",
+            "Competitor with worse content but stronger brand presence consistently outranks you: their off-page authority is winning",
+            "Author pages have <200 words and no credentials: weak expertise signal",
+            "No external citations or original data anywhere on your site: zero unique authority contribution",
+            "Site has no social proof (testimonials, case studies, press mentions): trust deficit on commercial pages"
+          ],
+          actions: [
+            "Monthly E-E-A-T audit checklist: (1) Author page quality, (2) About page credibility, (3) Citation density on informational content, (4) Original data or unique perspectives per article, (5) External press mentions",
+            "Invest in original research: surveys, studies, or data compilations that others will cite → even a simple '100 users surveyed' study earns backlinks and E-E-A-T",
+            "For an AI site: document your editorial process publicly → 'All articles reviewed by [credential] before publishing' → transparency is a trust signal",
+            "Build a press page: any mention in a publication, podcast, or industry site should be featured",
+            "Monthly goal: identify 1 new way to demonstrate real expertise — a case study, original experiment, expert interview, or tool that only your team could have built"
+          ]
+        },
+        {
+          t: "Underperforming content audit & refresh plan",
+          b: "w", tool: "GA4 + GSC combined view (traffic + position)",
+          why: "Content decay is inevitable. Pages that ranked well 12 months ago lose rankings to freshened competitor content. Systematically refreshing underperforming content is often 3–5x more efficient than creating new content, because refreshed pages start from an existing ranking history and authority foundation.",
+          signals: [
+            "Pages ranking 6–15 with declining month-over-month traffic: decay beginning — intervention now prevents full decline",
+            "Pages with <100 organic sessions/month that are >6 months old: low-performers — refresh or consolidate",
+            "Pages ranking #1–3 with declining CTR: content is being outcompeted at the impression level",
+            "Thin pages (<600 words) that used to rank but are now on page 2: freshness and depth now disadvantage them",
+            "Pages with no backlinks and declining traffic: no authority base to recover from without content improvement"
+          ],
+          actions: [
+            "Monthly audit: pull all pages with >10% MoM organic traffic decline → sort by volume of traffic lost → these are your refresh priorities",
+            "Content refresh playbook: (1) Update the publication date and schema dateModified, (2) Add a new section with the most recent developments, (3) Update all statistics, (4) Add 2–3 more internal links, (5) Improve the title tag if CTR is low",
+            "For thin pages: expand to 1,000+ words with genuine value — add examples, case studies, step-by-step breakdowns",
+            "Consolidation strategy: if you have 3 short underperforming pages on the same topic, merge them into one comprehensive page → redirect the other two",
+            "Set a quarterly goal: refresh your lowest-performing 10 pages each month → measure traffic recovery after 6–8 weeks"
+          ]
+        }
+      ]
+    },
+    {
+      icon: "ti-chart-line", title: "Monthly reporting",
+      items: [
+        {
+          t: "Month-over-month organic performance report",
+          b: "c", tool: "GA4 + GSC + Looker Studio dashboard",
+          why: "Monthly reporting provides the strategic view that daily monitoring obscures. Day-to-day noise averages out, revealing real trends: is your SEO investment delivering compounding returns? Are specific channels growing at different rates? This is the data you need for resource allocation decisions.",
+          signals: [
+            "MoM organic sessions declining for 3+ consecutive months: structural problem — not noise",
+            "Branded search growing while non-branded stays flat: you're building brand but not topical authority",
+            "Non-branded organic growing faster than overall organic: your content strategy is working",
+            "Organic conversion rate improving while traffic is flat: you're attracting better-fit users",
+            "Traffic growing but not ranking improvements: relying too heavily on long-tail volume — target higher-volume keywords"
+          ],
+          actions: [
+            "Build a Looker Studio dashboard with: MoM organic sessions, clicks from GSC, avg position, total indexed pages, new referring domains, CWV pass rate",
+            "Segment your organic traffic: branded vs non-branded, informational vs commercial, by content category",
+            "Set quarterly targets: 'X% MoM organic growth' with specific milestones by content type and keyword cluster",
+            "Attribution: tag organic landing pages with content clusters → understand which cluster is driving conversion value, not just traffic",
+            "Year-over-year comparison (after 12 months): this is the most meaningful metric → monthly volatility is noise, YoY growth is signal"
+          ]
+        },
+        {
+          t: "Keyword ranking distribution analysis",
+          b: "w", tool: "Ahrefs / Semrush Ranking Distribution report",
+          why: "Ranking distribution reveals the shape of your SEO health: what percentage of tracked keywords are on page 1 vs page 2 vs page 3+? A growing page-1 percentage means your SEO efforts are compounding. A stagnant distribution means you're working hard but not making progress.",
+          signals: [
+            "Page 1% declining month-over-month: you're losing more rankings than you're gaining",
+            "Page 2 bucket growing: many keywords on the edge — focused optimization could convert them to page 1",
+            "Page 3+ bucket growing: you're accumulating rankings for very competitive keywords with insufficient authority",
+            "Top-3 percentage growing faster than overall page-1: you're winning the high-CTR positions — excellent",
+            "Zero-to-page-1 movements (new keywords entering top 10): new content topics are gaining traction"
+          ],
+          actions: [
+            "Monthly: export full ranking distribution → build a simple chart tracking page-1%, page-2%, page-3+ over 6 months",
+            "Tactical response to growing page-2 bucket: build a monthly content optimization sprint around these — run the positions 11–20 audit",
+            "Tactical response to declining page-1%: audit what types of keywords are leaving page 1 → is it a specific topic cluster? A content type? A technical issue?",
+            "Compare distribution to 6 months ago: if overall keyword count grew but page-1% stayed the same, you're adding mostly long-tail low-competition keywords",
+            "Set a monthly target: 'page 1% should grow by 2 percentage points each quarter' — a realistic but ambitious benchmark"
+          ]
+        },
+        {
+          t: "Domain authority trend & link profile health",
+          b: "w", tool: "Ahrefs Domain Rating / Moz DA / Semrush Authority Score",
+          why: "Domain authority is the long-game metric. It moves slowly (1–2 points per month for an active site) but consistently predicts ranking potential. For a new AI site, monitoring monthly growth confirms that your link-building strategy is compounding.",
+          signals: [
+            "DA/DR growing 1–3 points/month: healthy link acquisition rate for a new site",
+            "DA/DR flat for 3+ months despite active link building: links may be low quality or disavow file too aggressive",
+            "DA/DR drops by >3 points in a month: significant link loss — investigate lost referring domains immediately",
+            "Referring domain count growing but DA not moving: you may be acquiring many low-quality links — focus on quality over quantity",
+            "Your DA/DR is significantly lower than your page-1 competitors: authority gap — aggressive link building needed to close it"
+          ],
+          actions: [
+            "Monthly tracking: log your DR/DA alongside referring domain count and key ranking positions — these three metrics together tell your full authority story",
+            "DA/DR plateau despite link building: audit last 3 months of acquired links → are they from genuinely authoritative, relevant sites?",
+            "DA/DR drop: export current vs previous month referring domains → identify lost domains → reach out to recover the highest-DA ones",
+            "Set a 12-month authority target: if you're at DR 20 today, DR 40 in 12 months is achievable with 1–3 quality links per week",
+            "Compare DA/DR to direct competitors monthly: close the gap by studying their link profiles → identify publications that link to them but not you"
+          ]
+        },
+        {
+          t: "Brand search volume & E-E-A-T growth",
+          b: "a", tool: "Google Trends + GSC brand keyword filter",
+          why: "Growing branded search volume is one of the strongest signals that your AI site is building genuine authority. Google interprets increasing brand searches as evidence that users find your site specifically valuable — a core component of E-E-A-T. Brand differentiation through search is a durable competitive moat.",
+          signals: [
+            "Branded search volume growing MoM: your marketing and content efforts are building brand recognition",
+            "Branded search growing faster than non-branded organic: you're becoming a known entity in your niche",
+            "Branded search flat while content traffic grows: you have topic authority but not yet brand authority",
+            "Branded queries including product/feature names: users are researching specific features — create dedicated landing pages",
+            "Negative branded queries appearing (e.g., '[Brand] reviews' or '[Brand] alternatives'): reputation management need"
+          ],
+          actions: [
+            "Monthly: filter GSC Performance by your brand name → track monthly click and impression volume → this is your brand SEO trendline",
+            "Brand search not growing despite traffic growth: invest in PR, community building, and social presence",
+            "For an AI site: launch a signature tool, framework, or research piece that gets named after your brand — named concepts drive branded search naturally",
+            "Monitor '[Brand] vs' and '[Brand] alternative' queries: create direct comparison pages → own this consideration-stage traffic",
+            "Set a monthly brand search growth target: 5–10% MoM is realistic for a site actively investing in brand"
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+/* ================================================================
+   STATE & PERSISTENCE
+   State is keyed by date so it auto-resets each morning.
+   ================================================================ */
+const TODAY = new Date().toISOString().split('T')[0];
+const STORAGE_KEY = `seo-dash-v1-${TODAY}`;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { d: {}, w: {}, m: {} };
+  } catch (e) { return { d: {}, w: {}, m: {} }; }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+const state = loadState();
+let cur = 'd';
+
+/* ================================================================
+   RENDERING
+   ================================================================ */
+function bClass(b) { return b==='c'?'bc':b==='w'?'bw':b==='o'?'bo':'ba'; }
+function bLabel(b) { return b==='c'?'Critical':b==='w'?'Watch':b==='o'?'Opportunity':'AI-specific'; }
+
+function buildPanel(tid) {
+  const el = document.getElementById(tid);
+  el.innerHTML = '';
+  DATA[tid].forEach((cat, ci) => {
+    const total = cat.items.length;
+    const block = document.createElement('div');
+    block.className = 'cat-block';
+    block.innerHTML = `
+      <div class="cat-hdr" onclick="toggleCat('${tid}',${ci})">
+        <div class="cat-title"><i class="ti ${cat.icon}" aria-hidden="true"></i>${cat.title}</div>
+        <div class="cat-right">
+          <span class="cat-cnt" id="cc-${tid}-${ci}">0/${total}</span>
+          <i class="ti ti-chevron-down chev open" id="chv-${tid}-${ci}" aria-hidden="true"></i>
+        </div>
+      </div>
+      <div id="cb-${tid}-${ci}">
+        ${cat.items.map((item, ii) => `
+          <div class="item-wrap" id="iw-${tid}-${ci}-${ii}">
+            <div class="item-row${state[tid][ci+'-'+ii]?' done':''}" id="ir-${tid}-${ci}-${ii}" onclick="expandItem('${tid}',${ci},${ii})">
+              <div class="item-left">
+                <div class="cb${state[tid][ci+'-'+ii]?' chkd':''}" id="ck-${tid}-${ci}-${ii}"
+                  onclick="event.stopPropagation();toggle('${tid}',${ci},${ii})">
+                  <i class="ti ti-check" aria-hidden="true" style="display:${state[tid][ci+'-'+ii]?'':'none'}"></i>
+                </div>
+                <div class="item-main">
+                  <div class="item-top">
+                    <span class="item-txt">${item.t}</span>
+                    <span class="badge ${bClass(item.b)}">${bLabel(item.b)}</span>
+                  </div>
+                  <div class="tool-line"><i class="ti ti-tool" aria-hidden="true" style="font-size:11px;margin-right:3px"></i>${item.tool}</div>
+                </div>
+              </div>
+              <button class="expand-btn" id="eb-${tid}-${ci}-${ii}"
+                onclick="event.stopPropagation();expandItem('${tid}',${ci},${ii})"
+                aria-label="Show details">
+                <i class="ti ti-chevron-down" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="detail-panel" id="dp-${tid}-${ci}-${ii}">
+              <div class="d-section d-why">
+                <div class="d-label">Why monitor</div>
+                <div class="d-body">${item.why}</div>
+              </div>
+              <div class="d-section d-sig">
+                <div class="d-label">Key signals & thresholds</div>
+                <ul class="d-list">${item.signals.map(s=>`<li>${s}</li>`).join('')}</ul>
+              </div>
+              <div class="d-section d-act">
+                <div class="d-label">Action playbook</div>
+                <ul class="d-list">${item.actions.map(a=>`<li>${a}</li>`).join('')}</ul>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+    el.appendChild(block);
+    updateCatCount(tid, ci);
+  });
+  updateProgress();
+}
+
+function expandItem(tid, ci, ii) {
+  const dp = document.getElementById(`dp-${tid}-${ci}-${ii}`);
+  const eb = document.getElementById(`eb-${tid}-${ci}-${ii}`);
+  const open = dp.classList.contains('open');
+  dp.classList.toggle('open', !open);
+  eb.classList.toggle('open', !open);
+}
+
+function toggle(tid, ci, ii) {
+  const key = `${ci}-${ii}`;
+  state[tid][key] = !state[tid][key];
+  const ir = document.getElementById(`ir-${tid}-${ci}-${ii}`);
+  const ck = document.getElementById(`ck-${tid}-${ci}-${ii}`);
+  const chk = ck.querySelector('i');
+  if (state[tid][key]) {
+    ir.classList.add('done'); ck.classList.add('chkd'); chk.style.display = '';
+  } else {
+    ir.classList.remove('done'); ck.classList.remove('chkd'); chk.style.display = 'none';
+  }
+  updateCatCount(tid, ci);
+  updateProgress();
+  saveState();
+}
+
+function toggleCat(tid, ci) {
+  const body = document.getElementById(`cb-${tid}-${ci}`);
+  const chv  = document.getElementById(`chv-${tid}-${ci}`);
+  const hidden = body.style.display === 'none';
+  body.style.display = hidden ? '' : 'none';
+  chv.classList.toggle('open', hidden);
+}
+
+function updateCatCount(tid, ci) {
+  const items = DATA[tid][ci].items;
+  let done = 0;
+  items.forEach((_, ii) => { if (state[tid][`${ci}-${ii}`]) done++; });
+  document.getElementById(`cc-${tid}-${ci}`).textContent = `${done}/${items.length}`;
+}
+
+function updateProgress() {
+  let total = 0, done = 0, critLeft = 0;
+  DATA[cur].forEach((cat, ci) => {
+    cat.items.forEach((item, ii) => {
+      total++;
+      if (state[cur][`${ci}-${ii}`]) done++;
+      else if (item.b === 'c') critLeft++;
+    });
+  });
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('pbar').style.width = pct + '%';
+  document.getElementById('ptxt').textContent = `${done} / ${total} done`;
+  document.getElementById('s-tot').textContent = total;
+  document.getElementById('s-dn').textContent  = done;
+  document.getElementById('s-cr').textContent  = critLeft;
+  document.getElementById('s-pc').textContent  = pct + '%';
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  cur = tab;
+  updateProgress();
+}
+
+function resetTab() {
+  state[cur] = {};
+  DATA[cur].forEach((cat, ci) => {
+    cat.items.forEach((_, ii) => {
+      const ir = document.getElementById(`ir-${cur}-${ci}-${ii}`);
+      const ck = document.getElementById(`ck-${cur}-${ci}-${ii}`);
+      const dp = document.getElementById(`dp-${cur}-${ci}-${ii}`);
+      const eb = document.getElementById(`eb-${cur}-${ci}-${ii}`);
+      if (ir) ir.classList.remove('done');
+      if (ck) { ck.classList.remove('chkd'); ck.querySelector('i').style.display = 'none'; }
+      if (dp) dp.classList.remove('open');
+      if (eb) eb.classList.remove('open');
+    });
+    updateCatCount(cur, ci);
+  });
+  updateProgress();
+  saveState();
+}
+
+/* ─── Init ─────────────────────────────────────────────── */
+const now = new Date();
+const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+document.getElementById('dt-display').textContent =
+  `${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()} ${now.getFullYear()}`;
+
+buildPanel('d');
+buildPanel('w');
+buildPanel('m');
+</script>
+</body>
+</html>
