@@ -297,58 +297,58 @@ const DATA = {
         {
           t: "Impressions & clicks in GSC (28-day rolling)",
           b: "w", tool: "GSC → Performance → Search results",
-          why: "Impressions = how often you appear in SERPs even when nobody clicks. CTR (clicks ÷ impressions) reveals how compelling your listing is. Impressions rising but clicks flat means Google shows you but users prefer competitors — a title/meta problem, not a ranking problem.",
+          why: "Impressions = how often you appear in SERPs even when nobody clicks. Rising impressions are an early indicator that your content is gaining trust before the traffic follows. CTR (clicks ÷ impressions) reveals how compelling your listing is — and unlike rankings, it's something you can improve this week without touching a single backlink.",
           signals: [
-            "CTR below 2% for position 1–3: your title tag is losing to competitors' listings",
-            "Impressions flat but position improving: you're ranking for very low-volume queries",
-            "Impressions up >10% week-over-week: content expansion or freshness update is working",
-            "Impressions dropping with stable positions: the queries themselves are losing search volume",
-            "CTR suddenly drops with stable position: a featured snippet or AI Overview appeared above you"
+            "Impressions up >10% week-over-week: Google is surfacing you more — identify which queries are growing and double down on that topic cluster",
+            "Clicks and impressions both growing: momentum signal — create more content in those topic clusters while you have Google's attention",
+            "CTR below 2% for position 1–3: your title tag is losing to competitors' listings — biggest quick win available",
+            "Impressions rising but CTR flat: you're appearing more but listings aren't compelling — title/meta optimization needed",
+            "Impressions dropping with stable positions: the queries themselves are losing search volume — check Google Trends"
           ],
           actions: [
+            "Impressions growing >10%: open GSC queries filter → sort by impressions change → identify the rising cluster → publish 2–3 more supporting pieces in that topic area",
+            "Both impressions and clicks growing: reinforce with internal links → expand content depth → don't change what's working",
             "Low CTR (<2%) on positions 1–3: rewrite title — add numbers, year, brackets, or a clear value proposition",
-            "If Google rewrote your meta description: give Google better structured data to pull from",
-            "Check SERP manually for that keyword: if AIO or featured snippet appeared, target the rich result format",
-            "Impressions dropping: use GSC date comparison to find which queries lost impressions → check Google Trends for volume shift",
-            "Clicks and impressions both growing: double down — create more content in those topic clusters"
+            "If Google rewrote your meta description: give Google better structured data and a cleaner opening paragraph to pull from",
+            "Impressions dropping: use GSC date comparison to find which queries lost impressions → check Google Trends for volume shift"
           ]
         },
         {
           t: "Average position for top 20 keywords",
           b: "w", tool: "GSC → Performance → Queries (sort by position)",
-          why: "The CTR cliff is steep: position 1 gets ~28% of clicks, position 3 gets ~10%, position 10 gets ~2.5%. A 2-spot drop from #1 to #3 can cut your traffic on that keyword by 65%. Tracking this daily catches rank fluctuations before they become permanent losses.",
+          why: "The CTR cliff is steep: position 1 gets ~28% of clicks, position 3 gets ~10%, position 10 gets ~2.5%. That same cliff works in your favor — a 2-spot gain from #3 to #1 can nearly triple your traffic on that keyword. Tracking this daily catches both ranking losses before they compound and ranking gains before competitors respond.",
           signals: [
-            "Drop of 3+ positions: investigate the specific page — check for unintended content changes",
-            "Drop from top 3 → positions 4–10: high urgency — this is the steepest CTR cliff",
+            "Gain of 3+ positions on a target keyword: act immediately to lock it in — this is a consolidation opportunity",
+            "Keyword just crossed into top 3: highest urgency upside — reinforce with internal links and schema to cement the position",
+            "Drop of 3+ positions: investigate the specific page — check for unintended content changes or new competitor",
             "Drop from page 1 → page 2: near-critical — CTR collapses from ~5% to under 1%",
-            "Sudden +5 position gain: a competitor likely dropped — act fast to consolidate with stronger internal linking",
             "Fluctuating daily within ±2 positions: normal ranking dance — don't over-optimize"
           ],
           actions: [
+            "3+ position gain: immediately add internal links from your most authoritative pages to this URL → add FAQ schema if not present → submit for re-crawl in GSC to lock in the gain",
+            "Keyword entered top 3: expand content depth on that page → add original data → build 1–2 more backlinks to cement it",
             "3+ position drop: check if the page was recently edited → compare your page vs current #1 (word count, freshness, schema)",
-            "New competitor appeared above you: analyze their content structure and match or exceed its depth",
-            "Keyword dropped from page 1 to page 2: add internal links from your most authoritative pages using the target keyword as anchor",
-            "Keyword gained: lock it in by expanding content depth and adding FAQ schema → improve internal linking to the page",
-            "Multiple keywords dropping simultaneously: likely algorithm update or site-wide technical issue — run a full crawl"
+            "Keyword dropped from page 1 to page 2: add internal links from related high-authority pages using the target keyword as anchor",
+            "Multiple keywords gaining simultaneously: identify what you did in the past 2–4 weeks → document and systematize it"
           ]
         },
         {
           t: "CTR for pages in positions 1–5",
           b: "o", tool: "GSC → Performance → Pages (filter by position 1–5)",
-          why: "CTR is the conversion rate of your search listing. Google uses click signals as a quality indicator — sustained low CTR on a high-ranking page can eventually cause a demotion. A well-crafted title that improves CTR from 3% to 6% literally doubles your traffic without any ranking change.",
+          why: "CTR is the conversion rate of your search listing — and unlike rankings, it's entirely within your control. A title that improves CTR from 3% to 6% doubles your traffic with zero ranking change. Pages already in positions 1–5 are your highest-leverage CTR wins: small improvements compound across your best-performing real estate. Google also uses click signals as a quality indicator — sustained high CTR reinforces your ranking position.",
           signals: [
-            "Position 1 benchmark: 25–35% CTR. Below 20%: title underperforming",
-            "Position 2 benchmark: 13–18%. Position 3: 9–12%",
+            "CTR above benchmark (pos 1: >30%, pos 2: >15%, pos 3: >10%): study that title formula — replicate it across similar pages immediately",
+            "CTR trending up week-over-week with stable position: your recent title/meta change is working — document the pattern",
+            "Position 1 benchmark: 25–35% CTR. Below 20%: title underperforming — opportunity to reclaim traffic",
             "Sudden CTR drop with same position: check if Google launched a featured snippet or AIO for that query",
-            "CTR >50% above benchmark on any page: study that title — replicate the formula across similar pages",
-            "Branded queries with low CTR: sitelinks may not be showing, or a reputation issue"
+            "High impressions + CTR below 3%: your single highest-leverage SEO win — fixing it costs nothing and can yield 50–200% traffic lift"
           ],
           actions: [
+            "CTR overperforming benchmark: identify the pattern — number? Format? Year? Value proposition phrasing? → apply same formula to your next 5 titles",
+            "CTR at benchmark or above: don't change the title — reinforce the page with internal links and fresh content instead",
             "CTR below benchmark: rewrite title — add current year, specific numbers, or parenthetical value add like '(Complete Guide)'",
-            "Run GSC date comparison to find when CTR dropped → check if SERP changed on that date",
-            "If Google consistently rewrites your title in SERPs: align your H1 and structured data with the intended title",
-            "Test different meta descriptions — include a clear CTA and the keyword naturally in the first sentence",
-            "High impressions + low CTR is your highest-leverage SEO win: fixing it costs nothing and can yield 50–200% traffic lift"
+            "Run GSC date comparison to find when CTR changed → check if SERP changed on that date",
+            "Test meta descriptions — include a clear CTA and the keyword naturally in the first sentence → monitor for 2 weeks"
           ]
         },
         {
@@ -368,6 +368,68 @@ const DATA = {
             "AIO cites you: keep this page updated and fresh → add more structured data to increase citation frequency",
             "Monitor weekly which new queries gain AIO coverage → adjust content calendar to front-load AIO-resistant content types",
             "Check competitor AIO citations — what content format is Google pulling from? Match and exceed that structure"
+          ]
+        }
+      ]
+    },
+    {
+      icon: "ti-trending-up", title: "Growth signals",
+      items: [
+        {
+          t: "Traffic surge — identify the cause & lock in the gain",
+          b: "o", tool: "GA4 → Acquisition → Organic Search + GSC → Performance",
+          why: "A traffic spike is as actionable as a traffic drop — but most dashboards only alert on the downside. When organic sessions jump >15%, you have a narrow window to identify what triggered it and systematically reinforce it before competitors notice the same opportunity. Unactioned surges fade; reinforced ones compound into permanent ranking gains.",
+          signals: [
+            "Organic sessions up >15% day-over-day: something is working — identify it within 24 hours",
+            "Single page driving the spike: a keyword gained position, an AIO cited you, or a backlink landed — find which",
+            "Multiple pages surging simultaneously: algorithm update rewarded your content profile — document what you've been doing right",
+            "Surge on a page you recently updated: your freshness or depth improvement worked — apply the same treatment to similar pages",
+            "Referral traffic spike accompanying organic spike: a major publication linked to you — find it and amplify"
+          ],
+          actions: [
+            "Open GA4 → filter organic traffic → sort landing pages by sessions change → identify the 1–3 pages driving the spike",
+            "For each spiking page: open GSC → check which keyword gained position → add internal links to that page from your most authoritative content → submit for re-crawl",
+            "If a backlink caused the spike: find it in Ahrefs/Semrush → reach out to the author → amplify on social → build a relationship for future coverage",
+            "If you recently updated the page: document exactly what changed (added data? restructured? new schema?) → apply the same treatment to your next 3–5 pages",
+            "Set a consolidation reminder for 7 days: check if the spike held → if yes, build 1–2 more links to cement the position"
+          ]
+        },
+        {
+          t: "Pages moving up — positions gaining 3+ spots",
+          b: "o", tool: "GSC → Performance → Queries (compare date ranges, sort by position change)",
+          why: "A page climbing 3+ positions is in an active ranking momentum window — Google is testing it higher and measuring user engagement signals. This is your best opportunity to apply reinforcement that converts a temporary test into a permanent gain. Most site owners only notice ranking drops; gains go unreinforced and often slip back.",
+          signals: [
+            "Keyword gained 3+ positions this week: active momentum window — reinforce within 48 hours for best results",
+            "Page crossed from position 6–10 into top 5: CTR is about to jump 3–5x — this is your highest-leverage action today",
+            "Page crossed from position 11–20 onto page 1: major win — lock it in aggressively with links and schema",
+            "Multiple keywords on the same page all gaining: Google is re-evaluating the whole page — comprehensive reinforcement warranted",
+            "Gaining keyword has high volume: prioritize over lower-volume gains — the traffic delta is disproportionately large"
+          ],
+          actions: [
+            "Identify all keywords that gained 3+ positions this week in GSC → prioritize by volume × position improvement",
+            "For each gaining page: add internal links from 2–3 of your most authoritative related pages using the target keyword in anchor text",
+            "Add or improve FAQ schema on the gaining page → submit for re-crawl in GSC → FAQ schema frequently pushes page-2 results to page 1",
+            "Expand content depth: add a new section addressing a related question the gaining page doesn't yet cover → 200–300 words of genuinely new content is often enough",
+            "Build 1 targeted backlink to the gaining page within the next 2 weeks — external authority during a ranking momentum window has outsized impact"
+          ]
+        },
+        {
+          t: "Unexpected keyword entrances — new queries sending traffic",
+          b: "o", tool: "GSC → Performance → Queries (filter: new queries this week vs last week)",
+          why: "Organic search regularly surfaces queries you never targeted — and these are among your highest-value content signals. A new query sending 50+ impressions means real users are searching for something your content partially satisfies. Acting on it quickly, before competitors notice the same gap, is how you capture compounding traffic from zero investment.",
+          signals: [
+            "New query with >50 impressions not in your keyword plan: real demand signal — you have a head start on competitors",
+            "New query where you're already in positions 5–15: you can reach page 1 with a targeted optimization, not a new page",
+            "Multiple related new queries clustering around the same topic: emerging topic cluster — publish a hub piece immediately",
+            "New query where your position is >20 but impressions are high: you're being considered but not competitive — a focused page can capture this",
+            "New branded query you haven't seen before (e.g. '[Your Brand] vs [Competitor]'): create a dedicated comparison page immediately"
+          ],
+          actions: [
+            "Weekly GSC export: filter queries with first impressions this week → sort by impressions → identify top 10 new queries",
+            "For new queries where you already rank 5–15: find the page Google is showing → update title tag and H1 to include the new query → add a dedicated section answering it directly",
+            "For new queries where you rank >20: evaluate whether to update an existing page or create a new one → if search intent matches an existing page, update it; if it's genuinely new intent, create a dedicated page",
+            "For emerging topic clusters: create a hub page targeting the primary query → link from it to all related pages → build topical authority before competitors consolidate",
+            "Track new queries weekly in a spreadsheet — queries that consistently appear but stay low-position are your highest-ROI content investment"
           ]
         }
       ]
@@ -478,20 +540,20 @@ const DATA = {
         {
           t: "New backlink alerts — last 24 hours",
           b: "o", tool: "Ahrefs / Semrush 'New backlinks' email alerts",
-          why: "For a new AI site, early link acquisition is the primary lever for domain authority growth. A single DA 70+ link can measurably shift your rankings within days. Knowing the moment you earn a link lets you immediately reinforce that page's internal linking.",
+          why: "Every new backlink is a compounding asset — it raises your domain authority, passes PageRank to the receiving page, and often brings referral traffic. For a new AI site, link acquisition is the primary lever for domain authority growth. Knowing the moment you earn a link gives you a 24-hour window to amplify the gain before the crawl cycle completes.",
           signals: [
-            "New link from DA/DR 50+: significant authority gain — act on it",
-            "5+ new links from the same domain at once: potential link scheme pattern — monitor",
-            "Links from .edu or .gov domains: highest-trust signals Google can receive",
-            "Anchor text exactly matching your target keyword multiple times: over-optimization risk — check your anchor text ratio",
-            "Link to a deep sub-page rather than homepage: actually better for topical authority — reinforce with internal links"
+            "New link from DA/DR 50+: significant authority gain — this is your highest-value signal today, act on it within 24 hours",
+            "New link from .edu or .gov domain: highest-trust signal Google can receive — treat this as a top-priority win",
+            "Link to a deep sub-page rather than homepage: strong topical authority signal — reinforce with internal links immediately",
+            "New link from a publication you've never been mentioned by before: organic discovery — investigate how they found you and replicate that trigger",
+            "5+ new links from the same domain at once: potential site-wide footer or widget — contact for editorial placement instead"
           ],
           actions: [
-            "New DA 50+ link acquired: immediately audit the receiving page → add internal links from this page to your 3–5 highest-priority ranking targets",
-            "Burst of links from same domain: check if it's a site-wide footer or widget — if so, ask for editorial placement instead",
-            "If link is from a major publication: amplify on social to drive traffic → engagement signals reinforce the authority gain",
-            "Track which content types are earning links naturally → double down on that format",
-            "After acquiring a strong link: submit the receiving page to GSC for re-crawl so Google processes the new authority faster"
+            "New DA 50+ link acquired: immediately add internal links from this page to your 3–5 highest-priority ranking targets → submit the receiving page for re-crawl in GSC to process the authority gain faster",
+            "New link from a major publication: amplify on social to drive direct traffic → engagement signals compound the authority gain",
+            "Identify what content earned the link → document the type (original data? tool? comparison?) → create 2 more pieces in that format",
+            "Track which content types earn links most naturally → this is your highest-ROI content format — double down",
+            "New .edu/.gov link: build internal links from the receiving page to your most strategic content — this link is now one of your most powerful PageRank distributors"
           ]
         },
         {
@@ -516,20 +578,20 @@ const DATA = {
         {
           t: "Brand mentions — linked & unlinked",
           b: "o", tool: "Google Alerts + Brand24 / Mention.com",
-          why: "Unlinked brand mentions are free link-building opportunities. The site already trusts you enough to mention your brand — they just didn't link. Converting 10% of unlinked mentions to links is typically achievable and represents pure authority gain with no content creation required.",
+          why: "Unlinked brand mentions are the highest-conversion link-building opportunity available to you. The publication already trusts your brand enough to mention it — converting that mention to a link requires one friendly email, not a content pitch. Typical conversion rate is 15–30%. Ten unlinked DA 60+ mentions converted in a month is a meaningful authority event.",
           signals: [
-            "Unlinked mention in DA 60+ publication: highest priority outreach target",
-            "Mention in a roundup or 'best of' post without a link: almost always convertible — easy ask",
-            "Negative review or critical mention: E-E-A-T risk — needs a response strategy",
-            "Competitor mentioned alongside you: understand how you're perceived relative to competitors",
-            "Spike in brand mentions: you may have been featured in something larger — investigate the source"
+            "Unlinked mention in DA 60+ publication: highest-priority outreach target — one email away from a strong link",
+            "Mention in a roundup or 'best of' post without a link: almost always convertible — the editor already chose you",
+            "Spike in brand mentions: you may have been featured in something larger — investigate the source immediately",
+            "Competitor mentioned alongside you in the same article: understand how you're being positioned → use for content differentiation",
+            "Negative review or critical mention: E-E-A-T risk — needs a response strategy"
           ],
           actions: [
-            "Unlinked mention found: send a brief, friendly outreach email asking if they'd consider adding a link — typical conversion rate 15–30%",
-            "Negative mention: respond professionally in comments or contact the author → a resolved negative can become a positive testimonial",
-            "Track which publications mention you most often without linking — these are relationship-building targets",
-            "Monthly: compile all unlinked DA 40+ mentions → batch your outreach to save time",
-            "Set up Google Alerts for: your brand name, your main tool names, and key team members"
+            "Unlinked mention found: send a brief, friendly email within 48 hours asking if they'd consider adding a link — typical conversion rate 15–30%, highest when you respond quickly",
+            "Batch outreach monthly: compile all unlinked DA 40+ mentions → send personalized outreach in one session → track responses",
+            "Spike in mentions: find the source → if it's a major publication, amplify on social → reach out to the author to build a relationship for future coverage",
+            "Track which publications mention you most often without linking — these are your relationship-building targets for earned links",
+            "Negative mention: respond professionally in comments or contact the author → a resolved negative can become a positive testimonial"
           ]
         }
       ]
@@ -559,19 +621,19 @@ const DATA = {
         {
           t: "Top 5 pages — ranking & traffic health check",
           b: "c", tool: "GA4 + GSC (compare landing page data)",
-          why: "Your top 5 organic pages likely generate 60–80% of your total organic traffic. A single-page drop has outsized business impact. These pages are also your internal link hubs — if they rank lower, the authority they pass to other pages drops too, creating a cascading effect.",
+          why: "Your top 5 organic pages likely generate 60–80% of your total organic traffic. These pages are both your biggest risk — a single drop has outsized business impact — and your biggest growth lever. A page in position 3 on a high-volume query that you push to position 1 can be worth more traffic than publishing 10 new pages. Monitor both directions with equal urgency.",
           signals: [
+            "Top page gaining traffic week-over-week: highest-priority reinforcement opportunity — lock in the gain now",
+            "Top page just improved 2+ positions: immediate action window — this is when internal links and schema have maximum leverage",
             "Traffic drop >10% on a top page day-over-day: investigate cause before assuming algorithm",
             "Position drop 3+ spots on a top page: check for content changes, new competitor, or technical issue",
-            "Impressions stable but traffic down on top page: featured snippet or AIO appeared and took clicks",
-            "Multiple top pages dropping simultaneously: site-wide technical issue or algorithm update",
-            "Top page gaining traffic: reinforce with internal links and fresh content to lock in the gain"
+            "Multiple top pages dropping simultaneously: site-wide technical issue or algorithm update"
           ],
           actions: [
+            "Top page gaining traffic: immediately strengthen internal links to this page from your other content → expand content depth → add structured data to capture rich results → this is your highest-ROI action today",
+            "Top page improved in position: add FAQ schema if not present → build 1–2 new backlinks to cement the gain → create a supporting piece that links back",
             "Single page traffic drop: check if the page was recently edited → open GSC URL Inspection → compare vs current top 3 competitors",
             "Position drop with no site changes: a stronger competitor published better content → do a content gap analysis → expand with more depth and updated data",
-            "Multiple pages dropping: check algorithm update calendar → run a full technical crawl → check for manual action in GSC",
-            "Top page unexpectedly improving: strengthen internal links to this page → expand content depth → add structured data to capture rich results",
             "After any site-wide change (redesign, migration, CMS update): monitor top 5 pages hourly for 48 hours"
           ]
         },
@@ -681,21 +743,21 @@ const DATA = {
         },
         {
           t: "AI Overview citations — are you included?",
-          b: "a", tool: "Manual SERP checks + GSC Search appearance filter",
-          why: "Being cited in an AI Overview signals to Google that your content is authoritative enough to be the basis for AI-generated answers. For an AI site, your topical authority determines whether Google's own AI trusts your content. Ignored in AIOs = authority gap that compounds over time.",
+          b: "o", tool: "Manual SERP checks + GSC Search appearance filter",
+          why: "Being cited in an AI Overview is the highest available authority signal Google can give your content — it means Google's own AI trusts your page enough to base its answer on it. For an AI site, growing your AIO citation count is a measurable proxy for E-E-A-T growth. Each new citation is a compounding win: cited pages earn more backlinks, more trust, and more citations over time.",
           signals: [
-            "You rank #1 but traffic dropped: AIO likely appeared and is absorbing clicks — verify manually",
-            "Your brand/site cited in an AIO: strong E-E-A-T signal — protect and strengthen that page",
-            "Competitors cited in AIO but not you: their content has structural or authority qualities yours lacks",
-            "AIO answer is factually wrong and cites a competitor: opportunity to write the definitive correct answer",
-            "AIO appears for your target queries but cites no AI-niche sites: Google may not yet trust AI-site content for these queries"
+            "Your page is cited in an AIO: this is a growth signal — protect, strengthen, and expand from this page",
+            "New AIO citation acquired this week that wasn't there last week: your E-E-A-T investments are paying off — identify what changed",
+            "You rank #1 but CTR dropped: AIO likely appeared — verify manually, then decide whether to target the citation or pivot query type",
+            "Competitors cited in AIO but not you: their content has a structural or authority quality yours lacks — identify and close the gap",
+            "AIO appears for your target queries but cites no AI-niche sites: first-mover opportunity — write the definitive answer before a competitor does"
           ],
           actions: [
-            "If cited: add more structured data → keep it fresh and updated → build more backlinks (cited content tends to stay cited)",
-            "If not cited despite strong rankings: rewrite your introduction as a direct, authoritative answer → use precise factual language, not marketing language → add original data",
-            "If AIO absorbs significant traffic: pivot toward transactional or tool-based queries where AIO is less prevalent",
-            "Monitor weekly which new queries gain AIO treatment → adjust content calendar to front-load AIO-resistant content types",
-            "Track AIO citations vs competitor citations monthly — a growing gap signals you need to invest in E-E-A-T improvements"
+            "Newly cited in AIO: immediately audit that page → add more structured data → refresh with current data → build 2–3 more backlinks to lock in the citation",
+            "Cited page: cross-link aggressively from it to adjacent pages you want to rank — AIO-cited pages carry elevated authority",
+            "Not yet cited despite strong rankings: rewrite your H1 paragraph as a 40–60 word direct answer to the query → use factual, precise language → add original data or statistics",
+            "Track your AIO citation count weekly — set a target (e.g., cited in 5 AIOs by end of quarter) and treat it like a KPI",
+            "Monitor weekly which new queries gain AIO treatment → publish content for emerging AIO queries before competitors, while citation competition is low"
           ]
         }
       ]
